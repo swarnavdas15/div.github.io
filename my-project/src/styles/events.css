@@ -1,0 +1,228 @@
+/* ---------- GLOBAL ---------- */
+:root {
+  --primary: #2563eb;
+  --secondary: #60a5fa;
+  --success: #22c55e;
+  --text-dark: #111827;
+  --text-light: #6b7280;
+  --bg-light: #f9fafb;
+  --card-bg: rgba(255, 255, 255, 0.8);
+}
+
+/* ---------- MAIN EVENTS SECTION ---------- */
+.events-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+  padding: 60px 40px;
+  background: var(--bg-light);
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ---------- EVENT CARD ---------- */
+.event-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.event-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.event-card img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.event-card-content {
+  padding: 18px;
+}
+
+.event-card-content h3 {
+  font-size: 1.25rem;
+  color: var(--text-dark);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.event-card-content p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* ---------- ADMIN BUTTON ---------- */
+.add-event-btn {
+  display: block;
+  margin: 25px auto 40px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  padding: 12px 26px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  transition: all 0.3s ease;
+}
+
+.add-event-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.4);
+}
+
+/* ---------- MODAL OVERLAY ---------- */
+.event-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* ---------- MODAL BOX ---------- */
+.event-modal {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(15px);
+  border-radius: 18px;
+  width: 92%;
+  max-width: 620px;
+  padding: 30px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  position: relative;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  from {opacity: 0; transform: scale(0.95);}
+  to {opacity: 1; transform: scale(1);}
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.7rem;
+  color: #333;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
+  color: var(--primary);
+}
+
+.event-modal h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.event-modal p {
+  color: var(--text-light);
+  margin-bottom: 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.register-btn, .share-btn {
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #fff;
+}
+
+.share-btn {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+}
+
+.register-btn:hover,
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* ---------- ADMIN EVENT FORM ---------- */
+.event-form {
+  max-width: 500px;
+  margin: 30px auto;
+  background: rgba(255,255,255,0.85);
+  border-radius: 16px;
+  padding: 25px 30px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
+}
+
+.event-form h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+}
+
+.event-form input,
+.event-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.8);
+  transition: border 0.2s ease;
+}
+
+.event-form input:focus,
+.event-form textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+.event-form button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.event-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+}

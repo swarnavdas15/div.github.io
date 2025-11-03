@@ -1,0 +1,226 @@
+.navbar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  background: transparent;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  color: tan;
+  height: 7vh;
+  padding: 0 2rem;
+}
+
+.navbar.scrolled {
+  background: url(/assets/navbg.jpg) repeat center center/contain;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 2%;
+  justify-content: flex-start;
+}
+
+/* Desktop Menu */
+.menu-desktop {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10%;
+}
+
+.text-sec {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 5%;
+}
+
+.btn-sec {
+  display: flex;
+  align-items: center;
+  width: 30%;
+  gap: 15%;
+}
+
+/* Links */
+.nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: white;
+  border-bottom: 2px solid #fc8b0b;
+  padding-bottom: 3px;
+}
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.dropdown-btn:hover {
+  color: white;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: rgba(3, 22, 52, 0.95);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 10px 0;
+  top: 35px;
+  left: 0;
+  border-radius: 8px;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 8px 16px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+}
+
+.dropdown-content a:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Buttons */
+.join-btn {
+  background: #fc8b0bb4;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.join-btn:hover {
+  background: #fe954a;
+  transform: translateY(-2px);
+}
+
+.join-btn.full {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Mobile */
+.menu-toggle {
+  display: none;
+  font-size: 1.8rem;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* 🌟 Modern Mobile Menu Overlay */
+.menu-mobile {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 75%;
+  height: 100%;
+  background: rgba(3, 22, 52, 0.92);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem 1.5rem;
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.4);
+  flex-direction: column;
+  gap: 20px;
+  animation: slideIn 0.3s ease forwards;
+}
+
+.menu-mobile a {
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.menu-mobile a:hover {
+  color: #fc8b0b;
+  transform: translateX(5px);
+}
+
+.mobile-resources {
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 15px;
+}
+
+.resource-heading {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.resource-link {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding-left: 0.8rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.resource-link:hover {
+  color: #fc8b0b;
+  transform: translateX(4px);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-desktop {
+    display: none;
+  }
+  .menu-toggle {
+    display: block;
+  }
+  .menu-mobile {
+    display: flex;
+  }
+}
