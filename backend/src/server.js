@@ -1,14 +1,14 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import connectDB from './src/config/db.js';
-import authRoutes from './src/routes/authRoutes.js';
-import adminRoutes from "./src/routes/adminRoutes.js";
-import memberRoutes from "./src/routes/memberRoutes.js";
-import eventRoutes from './src/routes/events.js'
-import photoRoutes from './src/routes/photos.js'
-import projectsRoutes from './src/routes/projects.js'
-import contactRoutes from './src/routes/contactRoutes.js'
+import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import adminRoutes from "./routes/adminRoutes.js";
+import memberRoutes from "./routes/memberRoutes.js";
+import eventRoutes from './routes/events.js'
+import photoRoutes from './routes/photos.js'
+import projectsRoutes from './routes/projects.js'
+import contactRoutes from './routes/contactRoutes.js'
 
 dotenv.config();
 const app = express();
@@ -21,7 +21,7 @@ app.use(cors({
 
 // Special handling for multipart form data (file uploads)
 import multer from 'multer';
-import { protect } from './src/middleware/authMiddleware.js';
+import { protect } from './middleware/authMiddleware.js';
 
 // Apply JSON parser for all routes
 app.use(express.json());
