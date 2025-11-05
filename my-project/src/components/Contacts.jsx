@@ -19,15 +19,26 @@ export default function Contacts() {
     setStatus("Sending...");
 
     try {
-      // Backend API connection (add later)
-      // await fetch("/api/contact", { method: "POST", body: JSON.stringify(formData) });
+      // Backend API connection
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-      setTimeout(() => {
+      const result = await response.json();
+
+      if (response.ok) {
         setStatus("✅ Message sent successfully!");
         setFormData({ name: "", email: "", message: "" });
-      }, 1000);
+      } else {
+        setStatus(result.message || "❌ Failed to send message. Try again later.");
+      }
     } catch (error) {
-      setStatus("❌ Failed to send message. Try again later.");
+      console.error("Error:", error);
+      setStatus("❌ Failed to send message. Please check your connection.");
     }
   };
 

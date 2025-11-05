@@ -1,23 +1,33 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from 'react-router-dom';
+
 import "../styles/navbar.css";
 
-const Navbar = ({ openRegistration, openLogin, openDashboard, currentPage }) => {
+const Navbar = ({ openRegistration, openLogin, currentPage, openMemberDashboard, openAdminDashboard }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
-  // Replace this with your actual user authentication logic
+
+  // ✅ user from localStorage (token-based auth)
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => setIsScrolled(window.scrollY > 100);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    // Example: simulate user login (replace with real auth later)
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
+  // ✅ check login from localStorage token
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser)); // { name, email, role }
+      } catch (err) {
+        console.error("Invalid user data in localStorage");
+      }
+    }
   }, []);
 
   const navLinks = [
@@ -36,9 +46,45 @@ const Navbar = ({ openRegistration, openLogin, openDashboard, currentPage }) => 
     const hash = href.substring(1);
     setIsMobileMenuOpen(false);
     setIsDropdownOpen(false);
-    // Optionally scroll into view
     const section = document.getElementById(hash);
     if (section) section.scrollIntoView({ behavior: "smooth" });
+  };
+  const navigate = useNavigate();
+
+  // ✅ role-based dashboard redirection
+  const handleDashboard = () => {
+   if (!user) {
+     console.log("No user found");
+     return;
+   }
+   console.log("User role:", user.role);
+   console.log("openAdminDashboard function:", typeof openAdminDashboard);
+   console.log("openMemberDashboard function:", typeof openMemberDashboard);
+   
+  if (user.role === "admin") {
+    // Instead of navigate, trigger popup
+    if (openAdminDashboard) {
+      console.log("Calling openAdminDashboard");
+      openAdminDashboard();
+    } else {
+      console.log("openAdminDashboard function not available");
+    }
+  } else {
+    // Instead of navigate, trigger popup
+    if (openMemberDashboard) {
+      console.log("Calling openMemberDashboard");
+      openMemberDashboard();
+    } else {
+      console.log("openMemberDashboard function not available");
+    }
+  }
+};
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    window.location.reload();
   };
 
   return (
@@ -94,9 +140,14 @@ const Navbar = ({ openRegistration, openLogin, openDashboard, currentPage }) => 
 
           <div className="btn-sec">
             {user ? (
-              <button className="join-btn" onClick={openDashboard}>
-                Dashboard
-              </button>
+              <>
+                <button className="join-btn" onClick={handleDashboard}>
+                  {user.role === "admin" ? "Admin Dashboard" : "Member Dashboard"}
+                </button>
+                <button className="join-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
             ) : (
               <>
                 <button className="join-btn" onClick={openRegistration}>
@@ -145,15 +196,26 @@ const Navbar = ({ openRegistration, openLogin, openDashboard, currentPage }) => 
           </div>
 
           {user ? (
-            <button
-              className="join-btn full"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                openDashboard();
-              }}
-            >
-              Dashboard
-            </button>
+            <>
+              <button
+                className="join-btn full"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleDashboard();
+                }}
+              >
+                {user.role === "admin" ? "Admin Dashboard" : "Member Dashboard"}
+              </button>
+              <button
+                className="join-btn full"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogout();
+                }}
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <>
               <button

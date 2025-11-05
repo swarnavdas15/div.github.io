@@ -1,0 +1,737 @@
+/* Modal Overlay - Enhanced and Responsive */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+/* Modal Content - Responsive Sizing with Increased Height */
+.modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 80%;
+  height: 80%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #e67e9c transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.close-login-modal{
+  width: 5%;
+  height: 5%;
+  border-radius: 90%;
+  border-collapse: collapse;
+  border: none;
+  font: 60%;
+  position: relative;
+  left: 95%;
+  background: #f7dbdbf3;
+}
+
+.close-login-modal:hover{
+  background-color: #c9b3b3d9;
+  transform: translateX(2%);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Custom scrollbar for modal content */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #e67e9c;
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #d36a89;
+}
+
+/* Registration Styles - Responsive */
+.registration-container {
+  display: flex;
+  width: 90%;
+  max-width: 900px;
+  background: #f9f9f9;
+  border-radius: 16px;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  height: 100%;
+}
+
+/* Image section */
+.registration-image {
+  flex: 1;
+  min-width: 0;
+  background: #f0f0f0;
+  position: relative;
+}
+
+.registration-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Form section */
+.registration-box {
+  flex: 1;
+  padding: 2.5rem;
+  max-width: 450px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.registration-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.registration-header h1 {
+  font-size: 1.75rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.registration-header p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.close-modal {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background: rgba(196, 187, 187, 0.1);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #050505;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #333;
+  transform: scale(1.1);
+}
+
+/* Form styling */
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.registration-form label {
+  display: block;
+}
+
+.registration-form span {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.registration-form input {
+  width: 100%;
+  padding: 0.875rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.registration-form input:focus {
+  outline: none;
+  border-color: #e67e9c;
+  box-shadow: 0 0 0 3px rgba(230, 126, 156, 0.1);
+}
+
+.password-field {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #666;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: #e67e9c;
+  background: rgba(230, 126, 156, 0.1);
+}
+
+.register-button {
+  width: 100%;
+  padding: 0.875rem;
+  background: #690421;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.register-button:hover {
+  background: #d36a89;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(230, 126, 156, 0.3);
+}
+
+.divider {
+  text-align: center;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider span {
+  background: #f9f9f9;
+  padding: 0 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.social-btn {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.social-btn:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.social-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+/* Provider-specific styling */
+.social-btn.google {
+  border-color: #ea4335;
+  color: #ea4335;
+}
+
+.social-btn.google:hover {
+  background: rgba(234, 67, 53, 0.1);
+  border-color: #d33b2c;
+}
+
+.social-btn.github {
+  border-color: #333;
+  color: #333;
+}
+
+.social-btn.github:hover {
+  background: rgba(51, 51, 51, 0.1);
+  border-color: #222;
+}
+
+.social-btn.linkedn {
+  border-color: #0077b5;
+  color: #22364e;
+}
+
+.social-btn.linkedn:hover {
+  background: rgba(0, 119, 181, 0.1);
+  border-color: #005885;
+}
+
+/* Loading state for OAuth */
+.oauth-loading {
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.oauth-loading p {
+  margin: 0;
+  color: #e67e9c;
+}
+
+.terms, .login-link {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.terms a, .login-link a {
+  color: #e67e9c;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms a:hover, .login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Enhanced Error Message Styling */
+.error-message {
+  background: linear-gradient(135deg, #fee, #fdd);
+  color: #c33;
+  padding: 0.875rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  border: 1px solid #fcc;
+  box-shadow: 0 2px 4px rgba(204, 51, 51, 0.1);
+  animation: errorSlideIn 0.3s ease-out;
+}
+
+@keyframes errorSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Focus Management */
+.modal-overlay:focus {
+  outline: none;
+}
+
+.modal-content:focus {
+  outline: none;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Loading state for form submission */
+.registration-form.submitting .register-button {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.registration-form.submitting .register-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* RESPONSIVE DESIGN - Mobile and Tablet Optimizations */
+
+/* Large Tablets and Small Desktop (max-width: 768px) */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+  
+  .modal-content {
+    max-width: 98vw;
+    border-radius: 12px;
+  }
+  
+  .registration-container {
+    max-width: 95vw;
+    border-radius: 12px;
+  }
+  
+  .registration-box {
+    padding: 2rem;
+    max-width: 100%;
+  }
+  
+  .registration-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .registration-form input {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .register-button {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Tablets Portrait (max-width: 640px) */
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 1rem;
+    padding-top: 1rem;
+  }
+  
+  .modal-content {
+    max-width: 100%;
+    max-height: 98vh;
+    min-height: 85vh;
+  }
+  
+  .registration-container {
+    flex-direction: column;
+    max-width: 100%;
+    border-radius: 12px;
+    min-height: 80vh;
+  }
+  
+  .registration-image {
+    min-height: 200px;
+    flex: none;
+  }
+  
+  .registration-box {
+    padding: 1.5rem;
+    max-width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .registration-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .registration-header p {
+    font-size: 0.9rem;
+  }
+  
+  .social-buttons {
+    gap: 0.75rem;
+  }
+  
+  .social-btn {
+    padding: 0.625rem;
+  }
+}
+
+/* Mobile Phones Large (max-width: 480px) */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.75rem;
+    padding-top: 1rem;
+  }
+  
+  .modal-content {
+    border-radius: 8px;
+    max-height: 96vh;
+    min-height: 80vh;
+  }
+  
+  .registration-container {
+    border-radius: 8px;
+    min-height: 75vh;
+  }
+  
+  .registration-image {
+    min-height: 150px;
+  }
+  
+  .registration-box {
+    padding: 1.25rem;
+    flex: 1;
+  }
+  
+  .registration-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .registration-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .registration-form {
+    gap: 0.875rem;
+  }
+  
+  .registration-form input {
+    padding: 0.6875rem;
+    font-size: 0.875rem;
+  }
+  
+  .register-button {
+    padding: 0.6875rem;
+    font-size: 0.9rem;
+  }
+  
+  .divider {
+    margin: 1.25rem 0;
+  }
+  
+  .social-buttons {
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .social-btn {
+    padding: 0.5rem;
+    flex: 1;
+  }
+  
+  .terms, .login-link {
+    font-size: 0.8rem;
+  }
+  
+  .close-modal {
+    width: 28px;
+    height: 28px;
+    font-size: 1.25rem;
+  }
+  
+  .error-message {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Mobile Phones Small (max-width: 360px) */
+@media (max-width: 360px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    padding-top: 0.75rem;
+  }
+  
+  .modal-content {
+    max-height: 94vh;
+    min-height: 75vh;
+  }
+  
+  .registration-container {
+    min-height: 70vh;
+  }
+  
+  .registration-box {
+    padding: 1rem;
+    flex: 1;
+  }
+  
+  .registration-header h1 {
+    font-size: 1.125rem;
+  }
+  
+  .registration-form input {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+  }
+  
+  .register-button {
+    padding: 0.625rem;
+    font-size: 0.875rem;
+  }
+  
+  .social-btn {
+    padding: 0.4375rem;
+  }
+  
+  .social-btn img {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .error-message {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .register-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .social-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .toggle-password:hover {
+    background: none;
+    color: #666;
+  }
+  
+  .registration-form input:focus {
+    box-shadow: 0 0 0 2px rgba(230, 126, 156, 0.2);
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .modal-content {
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .registration-container {
+    border: 0.5px solid rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Landscape Orientation Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .modal-overlay {
+    align-items: center;
+    padding: 0.5rem;
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .registration-container {
+    max-height: 90vh;
+  }
+  
+  .registration-box {
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+  }
+  
+  .registration-header {
+    margin-bottom: 1rem;
+  }
+  
+  .registration-header h1 {
+    font-size: 1.125rem;
+  }
+  
+  .registration-form {
+    gap: 0.75rem;
+  }
+  
+  .social-buttons {
+    margin-bottom: 1rem;
+  }
+  
+  .error-message {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Extra Large Screens */
+@media (min-width: 1200px) {
+  .modal-content {
+    max-width: 1000px;
+  }
+  
+  .registration-container {
+    max-width: 1000px;
+  }
+  
+  .registration-box {
+    max-width: 500px;
+  }
+}

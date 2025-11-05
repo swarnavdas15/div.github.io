@@ -8,15 +8,14 @@
   background: transparent;
   transition: all 0.3s ease;
   z-index: 1000;
-  color: tan;
+  color: rgb(230, 212, 190);
   height: 7vh;
   padding: 0 2rem;
 }
 
 .navbar.scrolled {
-  background: url(/assets/navbg.jpg) repeat center center/contain;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background: url(https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg) repeat center/contain;
+  
 }
 
 .navbar-container {
