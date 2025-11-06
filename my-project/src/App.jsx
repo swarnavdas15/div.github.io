@@ -58,6 +58,10 @@ function App() {
   const openEventModal = (event) => setSelectedEvent(event);
   const closeEventModal = () => setSelectedEvent(null);
 
+  useEffect(() => {
+  console.log("✅ API URL:", import.meta.env.VITE_API_URL);
+}, []);
+
   return (
     <>
       <Navbar  openLogin={openLogin}
