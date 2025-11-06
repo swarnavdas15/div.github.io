@@ -1,13 +1,12 @@
-// src/components/Projects.jsx
-// Vite + React version of your Projects component (frontend only).
-// Replace /api/projects endpoints with your backend endpoints when you implement them.
-
 import React, { useEffect, useState } from "react";
+import Loading from "./Loading";
+import Error from "./Error";
 import "../styles/projects.css";
 
 const Projects = ({ currentUser = null /* pass user object or null */, apiBase = import.meta.env.VITE_API_URL || "/api" }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -32,10 +31,11 @@ const Projects = ({ currentUser = null /* pass user object or null */, apiBase =
   // Fetch projects from API
   const fetchProjects = async () => {
     setLoading(true);
+    setError(null);
     try {
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-       
+        
       const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/projects`, {
         method: "GET",
         headers
@@ -53,17 +53,12 @@ const Projects = ({ currentUser = null /* pass user object or null */, apiBase =
         projects = data;
       }
       
-      // Debug: log each project
-      projects.forEach((project, index) => {
-        console.log(`Project ${index + 1} (${project.title})`);
-      });
-      
       console.log('Processed projects:', projects);
       setProjects(projects);
     } catch (err) {
       console.error("Error fetching projects:", err);
+      setError(err.message);
       setProjects([]);
-      showPopupMessage("Failed to fetch projects (frontend).", "error");
     } finally {
       setLoading(false);
     }
@@ -188,7 +183,32 @@ const Projects = ({ currentUser = null /* pass user object or null */, apiBase =
 
       <div className="projects-container">
         {loading ? (
-          <div className="no-projects-message">Loading projects...</div>
+          <Loading
+            type="pulse"
+            message="Loading amazing projects..."
+            interactive={true}
+            showProgress={true}
+            size="medium"
+            suggestions={[
+              "Projects are being loaded from our database",
+              "Discovering innovative work from our developers",
+              "Preparing project showcase for you"
+            ]}
+          />
+        ) : error ? (
+          <Error
+            type="error"
+            title="Failed to Load Projects"
+            message={error}
+            onRetry={fetchProjects}
+            showRetry={true}
+            showGoHome={false}
+            suggestions={[
+              "Check your internet connection",
+              "Try refreshing the page",
+              "If the problem persists, contact support"
+            ]}
+          />
         ) : projects.length === 0 ? (
           <div className="no-projects-message">
             <p>No projects available yet.</p>

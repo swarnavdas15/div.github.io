@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import MemberList from "./MemberList";
 import MemberDetail from "./MemberDetail";
 import MessagePanel from "./MessagePanel";
+import MessageList from "./MessageList";
 import ResourceUploader from "./ResourceUploader";
 import '../../styles/admindasboard.css';
 
@@ -70,23 +71,18 @@ const AdminDashboard = ({ onClose }) => {
           <p className="admin-muted">Manage members, messages, and resources efficiently</p>
           
           {!loading && (
-            <div style={{
-              display: 'flex',
-              gap: '2rem',
-              marginTop: '1.5rem',
-              justifyContent: 'center'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: 'white' }}>{stats.total}</div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Total Members</div>
+            <div className="admin-stats-container">
+              <div className="admin-stat-item" style={{ textAlign: 'center' }}>
+                <div className="admin-stat-number">{stats.total}</div>
+                <div className="admin-stat-label">Total Members</div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: 'white' }}>{stats.active}</div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>Active</div>
+              <div className="admin-stat-item" style={{ textAlign: 'center' }}>
+                <div className="admin-stat-number">{stats.active}</div>
+                <div className="admin-stat-label">Active</div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: 'white' }}>{stats.recent}</div>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>This Week</div>
+              <div className="admin-stat-item" style={{ textAlign: 'center' }}>
+                <div className="admin-stat-number">{stats.recent}</div>
+                <div className="admin-stat-label">This Week</div>
               </div>
             </div>
           )}
@@ -154,9 +150,28 @@ const AdminDashboard = ({ onClose }) => {
               }}>
                 📧 Communication Center
               </h3>
-              <MessagePanel onMessageSent={() => {
-                console.log("Message sent");
-              }} />
+              <MessagePanel
+                onMessageSent={() => {
+                  console.log("Message sent");
+                }}
+                members={members}
+              />
+            </div>
+            
+            <div className="admin-divider" />
+            
+            <div style={{ marginBottom: '2rem' }}>
+              <h3 style={{
+                color: '#374151',
+                marginBottom: '1rem',
+                fontSize: '1.1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                📁 Resource Upload
+              </h3>
+              <ResourceUploader onUploaded={() => alert("Resource uploaded successfully!")} />
             </div>
             
             <div className="admin-divider" />
@@ -170,9 +185,9 @@ const AdminDashboard = ({ onClose }) => {
                 alignItems: 'center',
                 gap: '0.5rem'
               }}>
-                📁 Resource Upload
+                📬 Sent Messages
               </h3>
-              <ResourceUploader onUploaded={() => alert("Resource uploaded successfully!")} />
+              <MessageList />
             </div>
           </div>
         </div>

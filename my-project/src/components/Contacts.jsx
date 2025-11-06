@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Loading from "./Loading";
+import Error from "./Error";
 import "../styles/contacts.css";
 
 export default function Contacts() {
@@ -8,6 +10,8 @@ export default function Contacts() {
     message: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
 
   const handleChange = (e) => {
@@ -16,7 +20,9 @@ export default function Contacts() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus("Sending...");
+    setLoading(true);
+    setError(null);
+    setStatus("");
 
     try {
       // Backend API connection
@@ -33,12 +39,17 @@ export default function Contacts() {
       if (response.ok) {
         setStatus("✅ Message sent successfully!");
         setFormData({ name: "", email: "", message: "" });
+        setError(null);
       } else {
-        setStatus(result.message || "❌ Failed to send message. Try again later.");
+        setError(result.message || "Failed to send message. Try again later.");
+        setStatus("");
       }
     } catch (error) {
       console.error("Error:", error);
-      setStatus("❌ Failed to send message. Please check your connection.");
+      setError("Failed to send message. Please check your connection.");
+      setStatus("");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,6 +87,7 @@ export default function Contacts() {
             value={formData.name}
             onChange={handleChange}
             required
+            disabled={loading}
           />
 
           <input
@@ -85,6 +97,7 @@ export default function Contacts() {
             value={formData.email}
             onChange={handleChange}
             required
+            disabled={loading}
           />
 
           <textarea
@@ -94,9 +107,32 @@ export default function Contacts() {
             value={formData.message}
             onChange={handleChange}
             required
+            disabled={loading}
           ></textarea>
 
-          <button type="submit" className="btn-submit">Send Message</button>
+          {loading ? (
+            <Loading
+              type="dots"
+              message="Sending your message..."
+              size="small"
+              interactive={false}
+            />
+          ) : error ? (
+            <Error
+              type="error"
+              title="Message Failed"
+              message={error}
+              onRetry={handleSubmit}
+              showRetry={true}
+              showGoHome={false}
+              showSupport={false}
+            />
+          ) : (
+            <button type="submit" className="btn-submit" disabled={loading}>
+              {loading ? "Sending..." : "Send Message"}
+            </button>
+          )}
+          
           {status && <p className="form-status">{status}</p>}
         </form>
       </div>

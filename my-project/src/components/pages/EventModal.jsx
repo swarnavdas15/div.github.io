@@ -1,4 +1,5 @@
 import React from "react";
+import "../../styles/events.css";
 
 const EventModal = ({ event, onClose }) => {
   return (

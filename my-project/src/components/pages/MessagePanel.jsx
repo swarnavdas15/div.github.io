@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import "../../styles/admindasboard.css";
 
 /**
  * Send notice to single member or all members
  * POST /api/admin/messages { to: "all" | memberId, subject, body }
  */
-export default function MessagePanel({ onMessageSent }) {
+export default function MessagePanel({ onMessageSent, members }) {
   const [toAll, setToAll] = useState(true);
   const [toMemberId, setToMemberId] = useState("");
   const [subject, setSubject] = useState("");
@@ -38,24 +39,112 @@ export default function MessagePanel({ onMessageSent }) {
     <div className="message-panel">
       <h3>Send Notice</h3>
       <form onSubmit={handleSend}>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: "1rem" }}>
           <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <input type="radio" checked={toAll} onChange={()=>setToAll(true)} /> To All
+            <input
+              type="radio"
+              checked={toAll}
+              onChange={()=>{
+                setToAll(true);
+                setToMemberId("");
+              }}
+            />
+            To All Members
           </label>
           <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <input type="radio" checked={!toAll} onChange={()=>setToAll(false)} /> To Specific
+            <input
+              type="radio"
+              checked={!toAll}
+              onChange={()=>setToAll(false)}
+            />
+            To Specific Member
           </label>
         </div>
 
         {!toAll && (
-          <input placeholder="Member ID" value={toMemberId} onChange={(e)=>setToMemberId(e.target.value)} />
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+              Select Member
+            </label>
+            <select
+              value={toMemberId}
+              onChange={(e)=>setToMemberId(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                border: "1px solid #d1d5db",
+                borderRadius: "0.375rem",
+                fontSize: "0.875rem"
+              }}
+              required
+            >
+              <option value="">Choose a member...</option>
+              {members && members.map((member) => (
+                <option key={member._id} value={member._id}>
+                  {member.name} ({member.email})
+                </option>
+              ))}
+            </select>
+          </div>
         )}
 
-        <input placeholder="Subject" value={subject} onChange={(e)=>setSubject(e.target.value)} />
-        <textarea placeholder="Message body" value={body} onChange={(e)=>setBody(e.target.value)} rows={5} />
+        <div style={{ marginBottom: "1rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+            Subject
+          </label>
+          <input
+            placeholder="Message subject"
+            value={subject}
+            onChange={(e)=>setSubject(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "0.5rem",
+              border: "1px solid #d1d5db",
+              borderRadius: "0.375rem",
+              fontSize: "0.875rem"
+            }}
+            required
+          />
+        </div>
 
-        <div style={{ marginTop: 8 }}>
-          <button className="btn" type="submit" disabled={loading}>{loading ? "Sending..." : "Send"}</button>
+        <div style={{ marginBottom: "1rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "500" }}>
+            Message
+          </label>
+          <textarea
+            placeholder="Write your message here..."
+            value={body}
+            onChange={(e)=>setBody(e.target.value)}
+            rows={5}
+            style={{
+              width: "100%",
+              padding: "0.5rem",
+              border: "1px solid #d1d5db",
+              borderRadius: "0.375rem",
+              fontSize: "0.875rem",
+              resize: "vertical"
+            }}
+            required
+          />
+        </div>
+
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            className="btn"
+            type="submit"
+            disabled={loading || (!toAll && !toMemberId)}
+            style={{
+              backgroundColor: loading || (!toAll && !toMemberId) ? "#9ca3af" : "#667eea",
+              color: "white",
+              padding: "0.5rem 1rem",
+              border: "none",
+              borderRadius: "0.375rem",
+              cursor: loading || (!toAll && !toMemberId) ? "not-allowed" : "pointer",
+              fontSize: "0.875rem"
+            }}
+          >
+            {loading ? "Sending..." : "Send Message"}
+          </button>
         </div>
       </form>
     </div>

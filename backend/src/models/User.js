@@ -10,7 +10,12 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["member", "admin"], default: "member" },
     avatar: { type: String, default: "" },
     isActive: { type: Boolean, default: true },
-    messages: [{ sender: String, content: String, createdAt: { type: Date, default: Date.now } }],
+    messages: [{
+      sender: { type: String, required: true },
+      subject: { type: String, required: true },
+      content: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now }
+    }],
     eventsParticipated: [{ type: String }],
   },
   { timestamps: true }

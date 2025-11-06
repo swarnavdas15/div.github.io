@@ -4,13 +4,20 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import "../styles/navbar.css";
 
-const Navbar = ({ openRegistration, openLogin, currentPage, openMemberDashboard, openAdminDashboard }) => {
+const Navbar = ({
+  openRegistration,
+  openLogin,
+  currentPage,
+  openMemberDashboard,
+  openAdminDashboard,
+  user,
+  onLogout
+}) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // ✅ user from localStorage (token-based auth)
-  const [user, setUser] = useState(null);
+  
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 100);
@@ -18,73 +25,71 @@ const Navbar = ({ openRegistration, openLogin, currentPage, openMemberDashboard,
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ✅ check login from localStorage token
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser)); // { name, email, role }
-      } catch (err) {
-        console.error("Invalid user data in localStorage");
-      }
-    }
-  }, []);
-
   const navLinks = [
-    { name: "Home", href: "#home" },
+    { name: "Home", href: "/" },
     { name: "About", href: "#about" },
     { name: "Events", href: "#events" },
     { name: "Projects", href: "#projects" },
   ];
 
   const resourcesLinks = [
+    { name: "Engineering Resources", href: "/engineering" },
     { name: "Blogs", href: "#blogs" },
-    { name: "Enhanced Resources", href: "#resources" },
   ];
 
   const handleNavigationClick = (href) => {
-    const hash = href.substring(1);
     setIsMobileMenuOpen(false);
     setIsDropdownOpen(false);
-    const section = document.getElementById(hash);
-    if (section) section.scrollIntoView({ behavior: "smooth" });
+    
+    // Check if it's a hash link (section on same page)
+    if (href.startsWith("#")) {
+      const hash = href.substring(1);
+      const section = document.getElementById(hash);
+      if (section) section.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // It's a route link, navigate to it
+      navigate(href);
+    }
   };
-  const navigate = useNavigate();
 
   // ✅ role-based dashboard redirection
   const handleDashboard = () => {
-   if (!user) {
-     console.log("No user found");
-     return;
-   }
-   console.log("User role:", user.role);
-   console.log("openAdminDashboard function:", typeof openAdminDashboard);
-   console.log("openMemberDashboard function:", typeof openMemberDashboard);
-   
-  if (user.role === "admin") {
-    // Instead of navigate, trigger popup
-    if (openAdminDashboard) {
-      console.log("Calling openAdminDashboard");
-      openAdminDashboard();
-    } else {
-      console.log("openAdminDashboard function not available");
+    if (!user) {
+      console.log("No user found");
+      return;
     }
-  } else {
-    // Instead of navigate, trigger popup
-    if (openMemberDashboard) {
-      console.log("Calling openMemberDashboard");
-      openMemberDashboard();
+    console.log("User role:", user.role);
+    console.log("openAdminDashboard function:", typeof openAdminDashboard);
+    console.log("openMemberDashboard function:", typeof openMemberDashboard);
+    
+    if (user.role === "admin") {
+      // Instead of navigate, trigger popup
+      if (openAdminDashboard) {
+        console.log("Calling openAdminDashboard");
+        openAdminDashboard();
+      } else {
+        console.log("openAdminDashboard function not available");
+      }
     } else {
-      console.log("openMemberDashboard function not available");
+      // Instead of navigate, trigger popup
+      if (openMemberDashboard) {
+        console.log("Calling openMemberDashboard");
+        openMemberDashboard();
+      } else {
+        console.log("openMemberDashboard function not available");
+      }
     }
-  }
-};
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    window.location.reload();
+    if (onLogout) {
+      onLogout();
+    } else {
+      // Fallback to direct localStorage operations
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.reload();
+    }
   };
 
   return (

@@ -10,6 +10,26 @@ export const getMemberInfo = async (req, res) => {
   }
 };
 
+// ✅ Update profile
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, collegeName } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        ...(name && { name }),
+        ...(collegeName && { collegeName })
+      },
+      { new: true, runValidators: true }
+    ).select("-password");
+    
+    res.json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Error updating profile" });
+  }
+};
+
 // ✅ Update avatar
 export const updateAvatar = async (req, res) => {
   try {

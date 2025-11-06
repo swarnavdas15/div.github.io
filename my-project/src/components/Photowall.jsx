@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
+import Loading from "./Loading";
+import Error from "./Error";
 import "../styles/photowall.css"; // keep your same CSS theme
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -17,6 +19,7 @@ const PhotoWall = () => {
   const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Get user from localStorage (same format as your existing auth system)
   const getUser = () => {
@@ -35,23 +38,28 @@ const PhotoWall = () => {
 
   // API functions
   const fetchPhotos = async () => {
+    setLoading(true);
+    setError(null);
     try {
       console.log('🔍 Fetching photos from:', `${API_BASE}/api/photos`);
-      const response = await fetch(`${API_BASE}/api/photos`);
+      const response = await fetch(`${API_BASE}/photos`);
       const data = await response.json();
       console.log('📸 Photos fetch response:', data);
       if (data.success) {
         setPhotos(data.data);
         setLoading(false);
       } else {
-        console.warn('API returned unsuccessful response:', data);
-        setLoading(false);
+        throw new Error(data.message || 'Failed to fetch photos');
       }
     } catch (error) {
       console.error('Error fetching photos:', error);
-      // Don't clear existing photos on API error - keep localStorage data
+      setError(error.message);
       setLoading(false);
     }
+  };
+  
+  const handleRetry = () => {
+    fetchPhotos();
   };
 
   const uploadPhoto = async (formData) => {
@@ -208,9 +216,11 @@ const PhotoWall = () => {
   }, [photos]);
 
   // Combine photos with saved positions
-  const positionedPhotos = useMemo(() => {
-    console.log('🔗 Combining', photos.length, 'photos with positions');
-    return photos.map(photo => {
+ const positionedPhotos = useMemo(() => {
+  console.log('🔗 Combining', photos.length, 'photos with positions');
+  return photos
+    .filter(photo => photo && photo._id) // remove null/invalid photos
+    .map(photo => {
       const saved = photoPositions[photo._id] || {
         position: { x: Math.random() * 70, y: Math.random() * 70 },
         rotation: (Math.random() - 0.5) * 20,
@@ -218,7 +228,8 @@ const PhotoWall = () => {
       };
       return { ...photo, ...saved };
     });
-  }, [photos, photoPositions]);
+}, [photos, photoPositions]);
+
 
   // 🖼 Upload handling
   const handleFileUpload = (e) => {
@@ -383,7 +394,7 @@ const PhotoWall = () => {
 
       <div className="photo-wall">
         <div className="photo-count">{photos.length} photo{photos.length !== 1 ? "s" : ""}</div>
-        {positionedPhotos.map((photo, index) => {
+        {(positionedPhotos || []).filter(photo => photo && photo._id).map((photo, index) => {
           // Assign size classes cyclically
           const sizeClass = index % 3 === 0 ? 'size-small' : index % 3 === 1 ? 'size-medium' : 'size-large';
           return (
@@ -575,10 +586,35 @@ const PhotoWall = () => {
         </div>
       )}
 
-      {loading && (
-        <div style={{ textAlign: 'center', padding: '20px' }}>
-          Loading photos...
-        </div>
+      {loading ? (
+        <Loading
+          type="spinner"
+          message="Loading beautiful memories..."
+          interactive={true}
+          showProgress={true}
+          size="medium"
+          suggestions={[
+            "We're curating your photo experience",
+            "Preparing the visual feast for you",
+            "Loading community moments..."
+          ]}
+        />
+      ) : error ? (
+        <Error
+          type="error"
+          title="Failed to Load Photos"
+          message={error}
+          onRetry={handleRetry}
+          showRetry={true}
+          showGoHome={false}
+          suggestions={[
+            "Check your internet connection",
+            "Try refreshing the page",
+            "The photos might be temporarily unavailable"
+          ]}
+        />
+      ) : (
+        null
       )}
     </main>
   );

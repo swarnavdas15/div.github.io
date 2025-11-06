@@ -3,10 +3,14 @@ import EventCard from "./pages/EventCard";
 import EventModal from "./pages/EventModal";
 import ConfirmationModal from "./pages/ConfirmationModal";
 import NotificationPopup from "./pages/NotificationPopup";
+import Loading from "./Loading";
+import Error from "./Error";
 import "../styles/events.css";
 
 const Event = ({ isAdmin = false, userId }) => {
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
@@ -40,12 +44,48 @@ const Event = ({ isAdmin = false, userId }) => {
 
   // 🟢 Fetch events from backend
   useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const apiUrl = getApiUrl();
+        const res = await fetch(`${apiUrl}/events`);
+        const data = await res.json();
+        
+        if (res.ok) {
+          setEvents(data.data || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch events');
+        }
+      } catch (err) {
+        setError(err.message);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchEvents();
+  }, []);
+  
+  const handleRetry = () => {
     const apiUrl = getApiUrl();
+    setLoading(true);
+    setError(null);
+    
     fetch(`${apiUrl}/events`)
       .then((res) => res.json())
-      .then((data) => setEvents(data.data || []))
-      .catch((err) => console.error(err));
-  }, []);
+      .then((data) => {
+        if (res.ok) {
+          setEvents(data.data || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch events');
+        }
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  };
 
   // Get token for authenticated requests
   const getAuthHeaders = () => {
@@ -285,7 +325,7 @@ const Event = ({ isAdmin = false, userId }) => {
   const categories = ["All", ...new Set(events.map((e) => e.category))];
 
   return (
-    <section className="eventpro-section">
+    <section id="events" className="eventpro-section">
       <div className="eventpro-header">
         <h2>Events</h2>
         {isAdmin && (
@@ -478,35 +518,71 @@ const Event = ({ isAdmin = false, userId }) => {
         </form>
       )}
 
-      <div className="eventpro-grid">
-        {filteredEvents.map((event) => (
-          <div key={event._id} className="eventpro-card">
-            <EventCard
-              event={event}
-              onClick={() => setSelectedEvent(event)}
-              onShare={() => {
-                navigator.clipboard.writeText(window.location.href + `#event-${event._id}`);
-                setNotification({
-                  isOpen: true,
-                  title: "Link Copied",
-                  message: "Event link copied to clipboard!",
-                  type: "success"
-                });
-              }}
-            />
-            {isAdmin && (
-              <div className="eventpro-admin-actions">
-                <button onClick={() => {
-                  setNewEvent(event);
-                  setShowForm(true);
-                }}>✏️ Edit</button>
-                <button onClick={() => handleDelete(event._id)}>🗑️ Delete</button>
-                <button onClick={() => deactivateLink(event)}>🚫 Deactivate</button>
+      {loading ? (
+        <Loading
+          type="wave"
+          message="Loading events..."
+          interactive={true}
+          showProgress={true}
+          size="medium"
+          suggestions={[
+            "Events are being fetched from our servers",
+            "This usually takes just a moment",
+            "We're preparing an amazing experience for you"
+          ]}
+        />
+      ) : error ? (
+        <Error
+          type="error"
+          title="Failed to Load Events"
+          message={error}
+          onRetry={handleRetry}
+          showRetry={true}
+          showGoHome={false}
+          suggestions={[
+            "Check your internet connection",
+            "Try refreshing the page",
+            "If the problem persists, contact support"
+          ]}
+        />
+      ) : (
+        <div className="eventpro-grid">
+          {filteredEvents.length === 0 ? (
+            <div className="no-events-message">
+              <p>No events found.</p>
+              {isAdmin && <p>Click "Add Event" to create the first event!</p>}
+            </div>
+          ) : (
+            filteredEvents.map((event) => (
+              <div key={event._id} className="eventpro-card">
+                <EventCard
+                  event={event}
+                  onClick={() => setSelectedEvent(event)}
+                  onShare={() => {
+                    navigator.clipboard.writeText(window.location.href + `#event-${event._id}`);
+                    setNotification({
+                      isOpen: true,
+                      title: "Link Copied",
+                      message: "Event link copied to clipboard!",
+                      type: "success"
+                    });
+                  }}
+                />
+                {isAdmin && (
+                  <div className="eventpro-admin-actions">
+                    <button onClick={() => {
+                      setNewEvent(event);
+                      setShowForm(true);
+                    }}>✏️ Edit</button>
+                    <button onClick={() => handleDelete(event._id)}>🗑️ Delete</button>
+                    <button onClick={() => deactivateLink(event)}>🚫 Deactivate</button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+            ))
+          )}
+        </div>
+      )}
 
       {selectedEvent && (
         <EventModal

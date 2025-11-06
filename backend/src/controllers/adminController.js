@@ -56,14 +56,72 @@ export const changeMemberPassword = async (req, res) => {
 
 // ✅ Send message to selected or all members
 export const sendMessage = async (req, res) => {
-  const { content, memberIds } = req.body;
+  const { to, subject, body } = req.body;
   try {
-    const filter = memberIds?.length ? { _id: { $in: memberIds } } : { role: "member" };
+    let filter;
+    
+    if (to === "all") {
+      // Send to all members
+      filter = { role: "member" };
+    } else {
+      // Send to specific member
+      filter = { _id: to, role: "member" };
+    }
+    
     await User.updateMany(filter, {
-      $push: { messages: { sender: "admin", content } },
+      $push: { messages: { sender: "admin", subject, content: body } },
     });
     res.json({ message: "Message sent successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error sending message" });
+  }
+};
+
+// ✅ Get all messages from all members
+export const getAllMessages = async (req, res) => {
+  try {
+    const members = await User.find({ role: "member" }).select("_id name email messages");
+    const allMessages = [];
+    
+    members.forEach(member => {
+      member.messages.forEach(message => {
+        allMessages.push({
+          _id: message._id,
+          memberId: member._id,
+          memberName: member.name,
+          memberEmail: member.email,
+          sender: message.sender,
+          subject: message.subject,
+          content: message.content,
+          createdAt: message.createdAt
+        });
+      });
+    });
+    
+    // Sort by createdAt descending (newest first)
+    allMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    res.json(allMessages);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching messages" });
+  }
+};
+
+// ✅ Delete specific message from specific member
+export const deleteMessage = async (req, res) => {
+  const { memberId, messageId } = req.params;
+  try {
+    const result = await User.updateOne(
+      { _id: memberId, role: "member" },
+      { $pull: { messages: { _id: messageId } } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    
+    res.json({ message: "Message deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting message" });
   }
 };

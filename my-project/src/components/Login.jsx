@@ -35,13 +35,6 @@ export default function Login({ closeModal, openRegistration, isModal = false, o
       localStorage.setItem('user', JSON.stringify(data.user));
 
       // 🔥 Role-based dashboard navigation
-      if (data.user.role === 'admin') {
-        window.location.hash = '#admin';
-      } else {
-        window.location.hash = '#member';
-      }
-
-      // Optionally notify parent (Navbar)
       if (onLoginSuccess) onLoginSuccess(data.user);
 
       if (isModal && closeModal) closeModal();

@@ -1,5 +1,5 @@
 import React from "react";
- // unique isolated CSS file (to avoid conflicts)
+import "../../styles/events.css";
 
 const EventCard = ({
   event,

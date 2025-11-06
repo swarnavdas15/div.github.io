@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles/registration.css";
 
 export default function Registration({ closeModal, openLogin }) {
   const [formData, setFormData] = useState({

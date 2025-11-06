@@ -6,6 +6,8 @@ import {
   deleteMember,
   changeMemberPassword,
   sendMessage,
+  getAllMessages,
+  deleteMessage,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -16,6 +18,8 @@ router.get("/members/:id", protect, adminOnly, getMemberById);
 router.put("/members/:id/deactivate", protect, adminOnly, deactivateMember);
 router.delete("/members/:id", protect, adminOnly, deleteMember);
 router.put("/members/:id/password", protect, adminOnly, changeMemberPassword);
-router.post("/message", protect, adminOnly, sendMessage);
+router.post("/messages", protect, adminOnly, sendMessage);
+router.get("/messages", protect, adminOnly, getAllMessages);
+router.delete("/messages/:memberId/:messageId", protect, adminOnly, deleteMessage);
 
 export default router;

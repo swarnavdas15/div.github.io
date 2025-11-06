@@ -10,9 +10,10 @@ import Contacts from './components/Contacts'
 import Footer from './components/Footer'
 import Login from "./components/Login"
 import Registration from "./components/Registration"
-import AdminDashboard from './components/pages/AdminDashboard'
+import AdminDashboard from './components/pages/adminDashboard'
 import MemberDashboard from './components/pages/MemberDashboard'
 import EventModal from './components/pages/EventModal'
+import Engineering from './components/pages/Engineering'
 
 function App() {
 
@@ -41,6 +42,17 @@ function App() {
   const openAdminDashboard = () => setShowAdminDashboard(true);
   const closeAdminDashboard = () => setShowAdminDashboard(false);
 
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    
+    // Open appropriate dashboard based on user role
+    if (userData.role === 'admin') {
+      setShowAdminDashboard(true);
+    } else {
+      setShowMemberDashboard(true);
+    }
+  };
+
   const openLogin = () => {
     setShowLogin(true);
     setShowRegistration(false);
@@ -64,10 +76,20 @@ function App() {
 
   return (
     <>
-      <Navbar  openLogin={openLogin}
+      <Navbar
+        openLogin={openLogin}
         openRegistration={openRegistration}
         openMemberDashboard={openMemberDashboard}
-        openAdminDashboard={openAdminDashboard}/>
+        openAdminDashboard={openAdminDashboard}
+        user={user}
+        onLogout={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+          setShowMemberDashboard(false);
+          setShowAdminDashboard(false);
+        }}
+      />
       <Routes>
         {/* 🏠 Home Page */}
         <Route
@@ -94,15 +116,23 @@ function App() {
         {/* 🛠 Admin Dashboard */}
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
+        {/* 🔧 Engineering Resources */}
+        <Route path="/engineering" element={<Engineering openLogin={openLogin} openRegistration={openRegistration} />} />
+
         {/* Optional login/register pages */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/register" element={<Registration />} />
       </Routes>
       <Footer/>
 
        {showLogin && (
         <div className="modal-overlay">
-          <Login closeModal={closeLogin} openRegistration={openRegistration} isModal={true} />
+          <Login
+            closeModal={closeLogin}
+            openRegistration={openRegistration}
+            isModal={true}
+            onLoginSuccess={handleLoginSuccess}
+          />
         </div>
       )}
 
