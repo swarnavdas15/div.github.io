@@ -10,7 +10,7 @@ import Contacts from './components/Contacts'
 import Footer from './components/Footer'
 import Login from "./components/Login"
 import Registration from "./components/Registration"
-import AdminDashboard from './components/pages/adminDashboard'
+import AdminDashboard from './components/pages/AdminDashboarddminDashboard'
 import MemberDashboard from './components/pages/MemberDashboard'
 import EventModal from './components/pages/EventModal'
 import Engineering from './components/pages/Engineering'
