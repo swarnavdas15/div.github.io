@@ -9,11 +9,12 @@ import Projects from './components/Projects'
 import Contacts from './components/Contacts'
 import Footer from './components/Footer'
 import Login from "./components/Login"
-import Registration from "./components/Registration"
-import AdminDashboard from './components/pages/AdminDashboarddminDashboard'
+import Registration from './components/Registration'
+
 import MemberDashboard from './components/pages/MemberDashboard'
 import EventModal from './components/pages/EventModal'
 import Engineering from './components/pages/Engineering'
+import AdminDashboard from './components/pages/AdminDashboard.jsx'
 
 function App() {
 
@@ -70,9 +71,7 @@ function App() {
   const openEventModal = (event) => setSelectedEvent(event);
   const closeEventModal = () => setSelectedEvent(null);
 
-  useEffect(() => {
-  console.log("✅ API URL:", import.meta.env.VITE_API_URL);
-}, []);
+  // Removed development console.log statement
 
   return (
     <>
