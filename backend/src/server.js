@@ -15,6 +15,10 @@ const app = express();
 connectDB();
 
 // Apply JSON parser for all routes
+const allowedOrigins = [
+  process.env.CLIENT_URL,      // your production frontend (vercel)
+  "http://localhost:5173",     // local vite dev
+];
 
 app.use(
   cors({
