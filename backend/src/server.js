@@ -15,8 +15,6 @@ const app = express();
 connectDB();
 
 // Apply JSON parser for all routes
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
@@ -31,6 +29,10 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Special handling for multipart form data (file uploads)
 import multer from 'multer';
