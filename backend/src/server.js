@@ -11,7 +11,7 @@ import eventRoutes from './routes/events.js';
 import photoRoutes from './routes/photos.js';
 import projectsRoutes from './routes/projects.js';
 import contactRoutes from './routes/contactRoutes.js';
-import { protect } from './middleware/authMiddleware.js';
+import { protect, adminOnly } from './middleware/authMiddleware.js'; // ✅ include both
 
 dotenv.config();
 const app = express();
@@ -47,14 +47,16 @@ app.use(
   })
 );
 
-// 📦 Routes
+// 📦 Routes (public first)
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/member', memberRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/photos', photoRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api', contactRoutes);
+
+// 🛡️ Protected routes
+app.use('/api/member', protect, memberRoutes);
+app.use('/api/admin', protect, adminOnly, adminRoutes);
 
 // Root test route
 app.get('/', (req, res) => {
