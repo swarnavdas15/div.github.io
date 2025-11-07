@@ -16,17 +16,19 @@ connectDB();
 
 // Apply JSON parser for all routes
 const allowedOrigins = [
-  process.env.CLIENT_URL,      // your production frontend (vercel)
-  "http://localhost:5173",
-  "https://div-github-io.vercel.app/",     // local vite dev
-];
+  process.env.CLIENT_URL,              // from Render env
+  "http://localhost:5173",             // local dev
+  "https://div-github-io.vercel.app" 
+  ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl)
+      console.log("🔍 Request Origin:", origin);
+      const validOrigins = allowedOrigins.filter(Boolean); // remove undefined values
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (validOrigins.includes(origin)) return callback(null, true);
+      console.warn("🚫 Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
