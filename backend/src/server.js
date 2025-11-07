@@ -69,6 +69,11 @@ app.get('/', (req, res) => {
   res.send('✅ Backend is running...');
 });
 
+app.use((req, res) => {
+  console.log("🌐 Unhandled route:", req.path);
+  res.status(200).send('⚠️ Frontend route handled by Vercel');
+});
+
 // 🚀 Server listen (Render-compatible)
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
