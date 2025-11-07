@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../styles/events.css";
 
 const EventCard = ({
@@ -10,6 +10,8 @@ const EventCard = ({
   onDelete,
   onToggleRegistration,
 }) => {
+  const [imageError, setImageError] = useState(false);
+  
   const formatDate = (date) => {
     const d = new Date(date);
     return d.toLocaleDateString("en-GB", {
@@ -19,16 +21,62 @@ const EventCard = ({
     });
   };
 
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  const handleImageLoad = () => {
+    setImageError(false);
+  };
+
+  const isValidImageUrl = (url) => {
+    if (!url) return false;
+    try {
+      new URL(url);
+      
+      // Check for common image file extensions
+      if (url.match(/\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i)) {
+        return true;
+      }
+      
+      // Allow common image hosting services
+      const allowedDomains = [
+        'unsplash.com',
+        'picsum.photos',
+        'lorem.space',
+        'via.placeholder.com',
+        'res.cloudinary.com',  // Cloudinary URLs
+        'cloudinary.com',      // Alternative Cloudinary domain
+        'i.imgur.com',         // Imgur
+        'imgur.com',           // Imgur alternative
+        'i.stack.imgur.com'    // Stack Overflow imgur
+      ];
+      
+      // Check if URL contains any of the allowed domains
+      return allowedDomains.some(domain => url.includes(domain));
+      
+    } catch {
+      return false;
+    }
+  };
+
   return (
     <div className="eventpro-card" onClick={onClick} id={`event-${event._id}`}>
-      {event.imageUrl ? (
+      {event.imageUrl && isValidImageUrl(event.imageUrl) && !imageError ? (
         <img
           src={event.imageUrl}
           alt={event.title}
           className="eventpro-image"
+          onError={handleImageError}
+          onLoad={handleImageLoad}
         />
       ) : (
-        <div className="eventpro-no-image">No Image Available</div>
+        <div className="eventpro-no-image">
+          {event.imageUrl && !isValidImageUrl(event.imageUrl) ? 
+            "Invalid Image URL" : 
+            "No Image Available"
+          }
+        </div>
       )}
 
       <div className="eventpro-card-content">

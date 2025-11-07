@@ -147,3 +147,29 @@ export const toggleRegistration = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// ✅ Upload event image (Admin only)
+export const uploadImage = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user || user.role !== "admin")
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    // For now, return a mock image URL since we don't have Cloudinary setup
+    // In production, you would upload to Cloudinary, AWS S3, or similar service
+    const imageUrl = `/uploads/events/${req.file.filename}`;
+    
+    res.json({
+      success: true,
+      message: "Image uploaded successfully",
+      data: { imageUrl }
+    });
+  } catch (err) {
+    console.error("Error uploading image:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

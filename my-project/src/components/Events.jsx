@@ -40,7 +40,10 @@ const Event = ({ isAdmin = false, userId }) => {
     category: "",
     maxAttendees: "",
     status: "upcoming",
+    imageFile: null
   });
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
 
   // 🟢 Fetch events from backend
   useEffect(() => {
@@ -106,6 +109,129 @@ const Event = ({ isAdmin = false, userId }) => {
     setNewEvent((prev) => ({ ...prev, [name]: value }));
   };
 
+  // File upload handling
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith("image/")) {
+      setNotification({
+        isOpen: true,
+        title: "Invalid File",
+        message: "Please select a valid image file (JPG, PNG, GIF, WebP).",
+        type: "error"
+      });
+      return;
+    }
+    
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setNotification({
+        isOpen: true,
+        title: "File Too Large",
+        message: "Image file must be less than 5MB in size.",
+        type: "error"
+      });
+      return;
+    }
+    
+    setNewEvent((prev) => ({ ...prev, imageFile: file }));
+  };
+
+  // Drag and drop handling
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set dragOver to false if we're leaving the drop zone entirely
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDragOver(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (!file || !file.type.startsWith("image/")) {
+        setNotification({
+          isOpen: true,
+          title: "Invalid File",
+          message: "Please drop a valid image file (JPG, PNG, GIF, WebP).",
+          type: "error"
+        });
+        return;
+      }
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setNotification({
+          isOpen: true,
+          title: "File Too Large",
+          message: "Image file must be less than 5MB in size.",
+          type: "error"
+        });
+        return;
+      }
+      
+      setNewEvent((prev) => ({ ...prev, imageFile: file }));
+      setNotification({
+        isOpen: true,
+        title: "Image Added",
+        message: "Image file has been added successfully!",
+        type: "success"
+      });
+    }
+  };
+
+  // Image upload to Cloudinary via backend
+  const uploadImageToCloudinary = async (formData) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
+      const requestOptions = {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      const response = await fetch(`${getApiUrl()}/events/upload-image`, requestOptions);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Image upload error:', error);
+      throw error;
+    }
+  };
+
+  // Remove uploaded image
+  const removeImageFile = () => {
+    setNewEvent((prev) => ({ ...prev, imageFile: null, imageUrl: "" }));
+  };
+
   // Process form data for backend compatibility
   const processEventData = (eventData) => {
     const processed = { ...eventData };
@@ -144,19 +270,47 @@ const Event = ({ isAdmin = false, userId }) => {
       return;
     }
 
-    const method = newEvent._id ? "PUT" : "POST";
-    const apiUrl = getApiUrl();
-    const url = newEvent._id
-      ? `${apiUrl}/events/${newEvent._id}`
-      : `${apiUrl}/events`;
-    
-    // Process data for backend
-    const processedData = processEventData(newEvent);
-    
-    console.log('Sending data to:', url);
-    console.log('Data being sent:', processedData);
+    setUploading(true);
     
     try {
+      let processedData = { ...newEvent };
+      
+      // Handle image upload if new file is selected
+      if (newEvent.imageFile) {
+        setNotification({
+          isOpen: true,
+          title: "Uploading Image",
+          message: "Please wait while we upload the image...",
+          type: "info"
+        });
+
+        const formData = new FormData();
+        formData.append('image', newEvent.imageFile);
+        
+        const uploadResult = await uploadImageToCloudinary(formData);
+        
+        if (uploadResult.success) {
+          processedData.imageUrl = uploadResult.data.imageUrl;
+        } else {
+          throw new Error(uploadResult.message || 'Failed to upload image');
+        }
+      }
+      
+      // Remove imageFile from processed data before sending to backend
+      delete processedData.imageFile;
+      
+      // Process data for backend
+      processedData = processEventData(processedData);
+      
+      const method = newEvent._id ? "PUT" : "POST";
+      const apiUrl = getApiUrl();
+      const url = newEvent._id
+        ? `${apiUrl}/events/${newEvent._id}`
+        : `${apiUrl}/events`;
+      
+      console.log('Sending data to:', url);
+      console.log('Data being sent:', processedData);
+      
       const res = await fetch(url, {
         method,
         headers: getAuthHeaders(),
@@ -164,8 +318,6 @@ const Event = ({ isAdmin = false, userId }) => {
       });
       
       console.log('Response status:', res.status);
-      console.log('Response headers:', res.headers);
-      
       const data = await res.json();
       console.log('Response data:', data);
       
@@ -194,6 +346,7 @@ const Event = ({ isAdmin = false, userId }) => {
           category: "",
           maxAttendees: "",
           status: "upcoming",
+          imageFile: null
         });
       } else {
         setNotification({
@@ -207,10 +360,12 @@ const Event = ({ isAdmin = false, userId }) => {
       console.error("Error saving event:", error);
       setNotification({
         isOpen: true,
-        title: "Network Error",
-        message: `${error.message}. Please check your connection and try again.`,
+        title: "Error",
+        message: error.message || "Failed to save event. Please try again.",
         type: "error"
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -446,14 +601,54 @@ const Event = ({ isAdmin = false, userId }) => {
             </div>
             
             <div className="eventpro-form-field eventpro-form-full">
-              <label htmlFor="imageUrl">Image URL</label>
-              <input
-                id="imageUrl"
-                name="imageUrl"
-                placeholder="https://example.com/image.jpg"
-                value={newEvent.imageUrl}
-                onChange={handleInput}
-              />
+              <label htmlFor="eventImage">Event Image</label>
+              <div className={`event-image-upload ${uploading ? 'uploading' : ''}`}>
+                <input
+                  type="file"
+                  id="eventImage"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="event-image-input"
+                />
+                <label
+                  htmlFor="eventImage"
+                  className={`event-image-label ${dragOver ? 'drag-over' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  {!newEvent.imageFile ? (
+                    <div className="event-image-placeholder">
+                      <div className="event-image-icon">📷</div>
+                      <div className="event-image-text">
+                        <strong>Click to upload or drag and drop</strong>
+                        <span>PNG, JPG, GIF, WebP up to 5MB</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="event-image-preview">
+                      <img
+                        src={URL.createObjectURL(newEvent.imageFile)}
+                        alt="Event preview"
+                        className="event-preview-image"
+                        onLoad={() => URL.revokeObjectURL(newEvent.imageFile)}
+                      />
+                      <button
+                        type="button"
+                        className="event-remove-image"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeImageFile();
+                        }}
+                        title="Remove image"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </label>
+              </div>
             </div>
             
             <div className="eventpro-form-field eventpro-form-full">
@@ -494,8 +689,15 @@ const Event = ({ isAdmin = false, userId }) => {
           </div>
           
           <div className="eventpro-form-actions">
-            <button type="submit">
-              {newEvent._id ? "✨ Update Event" : "🎉 Create Event"}
+            <button type="submit" className="event-form-submit-btn" disabled={uploading}>
+              {uploading ? (
+                <>
+                  <div className="event-form-uploading-spinner"></div>
+                  {newEvent._id ? "Updating Event..." : "Creating Event..."}
+                </>
+              ) : (
+                newEvent._id ? "✨ Update Event" : "🎉 Create Event"
+              )}
             </button>
             <button type="button" onClick={() => {
               setShowForm(false);
@@ -510,8 +712,9 @@ const Event = ({ isAdmin = false, userId }) => {
                 category: "",
                 maxAttendees: "",
                 status: "upcoming",
+                imageFile: null
               });
-            }}>
+            }} disabled={uploading}>
               ❌ Cancel
             </button>
           </div>
@@ -557,6 +760,7 @@ const Event = ({ isAdmin = false, userId }) => {
               <div key={event._id} className="eventpro-card">
                 <EventCard
                   event={event}
+                  isAdmin={isAdmin}
                   onClick={() => setSelectedEvent(event)}
                   onShare={() => {
                     navigator.clipboard.writeText(window.location.href + `#event-${event._id}`);
@@ -567,17 +771,13 @@ const Event = ({ isAdmin = false, userId }) => {
                       type: "success"
                     });
                   }}
+                  onEdit={(event) => {
+                    setNewEvent(event);
+                    setShowForm(true);
+                  }}
+                  onDelete={handleDelete}
+                  onToggleRegistration={deactivateLink}
                 />
-                {isAdmin && (
-                  <div className="eventpro-admin-actions">
-                    <button onClick={() => {
-                      setNewEvent(event);
-                      setShowForm(true);
-                    }}>✏️ Edit</button>
-                    <button onClick={() => handleDelete(event._id)}>🗑️ Delete</button>
-                    <button onClick={() => deactivateLink(event)}>🚫 Deactivate</button>
-                  </div>
-                )}
               </div>
             ))
           )}
