@@ -13,7 +13,7 @@ import Registration from './components/Registration'
 import MemberDashboard from './components/pages/MemberDashboard'
 import EventModal from './components/pages/EventModal'
 import Engineering from './components/pages/Engineering'
-
+import AdminDashboard from './components/pages/AdminDashboard.jsx'
 
 function App() {
 
