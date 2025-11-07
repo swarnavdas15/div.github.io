@@ -159,7 +159,7 @@ const Engineering = ({ openLogin, openRegistration }) => {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(135deg, rgb(71 74 88) 0%, rgb(153 87 46) 50%, rgb(93 75 61) 100%);",
+      background: "linear-gradient(135deg, rgb(71 74 88) 0%, rgb(153 87 46) 50%, rgb(93 75 61) 100%)",
       padding: "2rem 0",
       overflowX: "hidden"
     }}>
