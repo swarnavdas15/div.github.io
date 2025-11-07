@@ -14,6 +14,9 @@ dotenv.config();
 const app = express();
 connectDB();
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Apply JSON parser for all routes
 const allowedOrigins = [
   process.env.CLIENT_URL,              // from Render env
@@ -37,8 +40,7 @@ app.use(
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 
 
 // Special handling for multipart form data (file uploads)
