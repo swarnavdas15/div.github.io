@@ -21,6 +21,12 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+  console.log('➡️ Incoming request:', req.method, req.path);
+  next();
+});
+
+
 // 🌐 CORS setup
 const allowedOrigins = [
   process.env.CLIENT_URL,                  // from Render env
