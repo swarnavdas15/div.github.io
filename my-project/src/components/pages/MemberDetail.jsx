@@ -34,7 +34,7 @@ export default function MemberDetail({ member, onUpdated, onDeleted }) {
     if (!confirm(`Delete ${member.name}? This cannot be undone.`)) return;
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/members/${member._id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/members/${member._id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -58,7 +58,7 @@ export default function MemberDetail({ member, onUpdated, onDeleted }) {
     }
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/members/${member._id}/password`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/members/${member._id}/password`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ password: pwd }),

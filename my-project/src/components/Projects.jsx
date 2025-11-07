@@ -36,7 +36,7 @@ const Projects = ({ currentUser = null /* pass user object or null */, apiBase =
       const token = localStorage.getItem('token');
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         
-      const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/projects`, {
+      const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/api/projects`, {
         method: "GET",
         headers
       });
@@ -112,7 +112,7 @@ const Projects = ({ currentUser = null /* pass user object or null */, apiBase =
       const headers = { "Content-Type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;
 
-      const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/projects`, {
+      const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/api/projects`, {
         method: "POST",
         headers,
         body: JSON.stringify(payload),

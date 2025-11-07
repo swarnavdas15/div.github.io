@@ -31,7 +31,7 @@ export default function MessageList() {
     if (!confirm("Are you sure you want to delete this message?")) return;
     
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/messages/${memberId}/${messageId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/messages/${memberId}/${messageId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

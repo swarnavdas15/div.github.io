@@ -90,7 +90,7 @@ const PhotoWall = () => {
 
       console.log('📤 Sending upload request to:', `${API_BASE}/photos/upload`);
       
-      const response = await fetch(`${API_BASE}/photos/upload`, requestOptions);
+      const response = await fetch(`${API_BASE}/api/photos/upload`, requestOptions);
       
       console.log('📥 Upload response status:', response.status);
       

@@ -49,7 +49,7 @@ const MemberDashboard = ({ onClose }) => {
 
   const setAvatar = async (path) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/member/avatar`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/member/avatar`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ const MemberDashboard = ({ onClose }) => {
 
     setSaving(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/member/profile`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/member/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
