@@ -19,7 +19,7 @@ export default function MessagePanel({ onMessageSent, members }) {
     setLoading(true);
     try {
       const payload = { to: toAll ? "all" : toMemberId, subject, body };
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/messages`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/messages`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify(payload),

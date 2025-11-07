@@ -22,7 +22,7 @@ export default function ResourceUploader({ onUploaded }) {
       form.append("title", title);
       form.append("description", desc);
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/resources`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/resources`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: form,

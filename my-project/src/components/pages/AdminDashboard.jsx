@@ -20,7 +20,7 @@ const AdminDashboard = ({ onClose }) => {
   const fetchMembers = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/members`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/members`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to load members");

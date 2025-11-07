@@ -16,7 +16,7 @@ export default function MemberDetail({ member, onUpdated, onDeleted }) {
     if (!confirm(`Toggle active status for ${member.name}?`)) return;
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/members/${member._id}/deactivate`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/members/${member._id}/deactivate`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       });

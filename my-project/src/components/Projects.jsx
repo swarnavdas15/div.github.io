@@ -154,7 +154,7 @@ const Projects = ({ currentUser = null /* pass user object or null */, apiBase =
       const headers = {};
       if (token) headers.Authorization = `Bearer ${token}`;
 
-      const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/projects/${projectId}`, {
+      const res = await fetch(`${apiBase || import.meta.env.VITE_API_URL}/api/projects/${projectId}`, {
         method: "DELETE",
         headers
       });

@@ -13,7 +13,7 @@ export default function MessageList() {
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/messages`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/messages`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to load messages");

@@ -22,7 +22,7 @@ const MemberDashboard = ({ onClose }) => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/member/me`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/member/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch profile");
