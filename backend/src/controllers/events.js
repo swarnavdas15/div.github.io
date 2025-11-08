@@ -165,20 +165,60 @@ export const toggleRegistration = async (req, res) => {
   }
 };
 
-// ✅ Upload event image (Admin only)
+// ✅ Upload event image (Admin only) - Enhanced version matching Photos controller
 export const uploadImage = async (req, res) => {
+  console.log('📤 Event image upload request received');
+  console.log('Request method:', req.method);
+  console.log('Request path:', req.path);
+  console.log('Content-Type:', req.headers['content-type']);
+  
   try {
-    const user = req.user;
-    if (!user || user.role !== "admin")
-      return res.status(403).json({ success: false, message: "Unauthorized" });
+    // Detailed logging of request data
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Request file object:', req.file ? {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      encoding: req.file.encoding,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    } : null);
+    console.log('User object:', req.user ? { id: req.user._id, name: req.user.name, role: req.user.role } : null);
 
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: "No file uploaded" });
+    // Validate user authentication
+    if (!req.user) {
+      console.log('❌ No user in request');
+      return res.status(401).json({ success: false, message: 'User not authenticated. Please log in.' });
     }
 
-    console.log('✅ Starting Cloudinary upload for event image...');
+    // Check admin role
+    if (req.user.role !== 'admin') {
+      console.log('❌ User is not admin:', req.user.role);
+      return res.status(403).json({ success: false, message: 'Admin access required for image upload.' });
+    }
 
-    // Upload to Cloudinary
+    // Validate file upload
+    if (!req.file) {
+      console.log('❌ No file in request');
+      return res.status(400).json({ success: false, message: 'No file uploaded. Please select an image file.' });
+    }
+
+    // Validate file type
+    if (!req.file.mimetype.startsWith('image/')) {
+      console.log('❌ Invalid file type:', req.file.mimetype);
+      return res.status(400).json({ success: false, message: 'Only image files are allowed.' });
+    }
+
+    // Validate file size (max 5MB for events)
+    if (req.file.size > 5 * 1024 * 1024) {
+      console.log('❌ File too large:', req.file.size);
+      return res.status(400).json({ success: false, message: 'File size must be less than 5MB.' });
+    }
+
+    console.log('✅ All validations passed, uploading to Cloudinary...');
+
+    // Create upload stream (matching Photos controller pattern)
+    const bufferStream = streamifier.createReadStream(req.file.buffer);
     const streamUpload = (buffer) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -199,21 +239,34 @@ export const uploadImage = async (req, res) => {
             }
           }
         );
-        streamifier.createReadStream(buffer).pipe(stream);
+        buffer.pipe(stream);
       });
     };
 
-    const result = await streamUpload(req.file.buffer);
+    // Upload to Cloudinary
+    const result = await streamUpload(bufferStream);
     
     const imageUrl = result.secure_url;
     
+    console.log('✅ Event image uploaded successfully:', imageUrl);
+    
+    // Return success response (matching Photos controller structure)
     res.json({
       success: true,
-      message: "Image uploaded successfully to Cloudinary",
-      data: { imageUrl }
+      data: { imageUrl },
+      message: 'Event image uploaded successfully!'
     });
-  } catch (err) {
-    console.error("Error uploading image to Cloudinary:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+
+  } catch (error) {
+    console.error('💥 Event image upload error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    res.status(500).json({
+      success: false,
+      message: `Upload failed: ${error.message || 'Unknown error occurred'}`
+    });
   }
 };

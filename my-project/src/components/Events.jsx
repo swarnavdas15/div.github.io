@@ -44,17 +44,19 @@ const Event = ({ isAdmin = false, userId }) => {
   });
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-   // API Configuration
-   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-   const FULL_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-   
-   // Debug: Log API configuration
-   console.log('🔧 API Config:', {
-     API_BASE_URL,
-     FULL_API_URL,
-     envVar: import.meta.env.VITE_API_URL,
-     currentLocation: window.location.origin
-   });
+  const [dragCounter, setDragCounter] = useState(0);
+  
+  // API Configuration
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const FULL_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  
+  // Debug: Log API configuration
+  console.log('🔧 API Config:', {
+    API_BASE_URL,
+    FULL_API_URL,
+    envVar: import.meta.env.VITE_API_URL,
+    currentLocation: window.location.origin
+  });
  
    // Get authentication headers
    const getAuthHeaders = (includeContentType = true) => {
@@ -165,13 +167,10 @@ const Event = ({ isAdmin = false, userId }) => {
     setNewEvent((prev) => ({ ...prev, [name]: value }));
   };
 
-  // File upload handling with enhanced feedback
+  // Simplified file upload handling (following Photowall pattern)
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
+    if (!file || !file.type.startsWith("image/")) {
       setNotification({
         isOpen: true,
         title: "Invalid File",
@@ -192,47 +191,46 @@ const Event = ({ isAdmin = false, userId }) => {
       return;
     }
     
-    // Show success feedback with file details
-    const fileSize = (file.size / 1024 / 1024).toFixed(2);
-    setNotification({
-      isOpen: true,
-      title: "Image Selected",
-      message: `${file.name} (${fileSize} MB) has been selected successfully!`,
-      type: "success"
-    });
-    
     setNewEvent((prev) => ({ ...prev, imageFile: file }));
   };
 
-  // Drag and drop handling
+  // Enhanced drag and drop handlers with proper counter
   const handleDragOver = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
   };
 
   const handleDragEnter = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    setDragOver(true);
+    setDragCounter(prev => prev + 1);
+    if (dragCounter === 0) {
+      setDragOver(true);
+    }
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    // Only set dragOver to false if we're leaving the drop zone entirely
-    if (!e.currentTarget.contains(e.relatedTarget)) {
-      setDragOver(false);
-    }
+    setDragCounter(prev => {
+      const newCounter = prev - 1;
+      if (newCounter === 0) {
+        setDragOver(false);
+      }
+      return newCounter;
+    });
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    setDragCounter(0);
     setDragOver(false);
     
     const files = e.dataTransfer.files;
+    console.log('🎯 Files dropped:', files.length);
+    
     if (files && files.length > 0) {
       const file = files[0];
+      console.log('📄 Dropped file:', file.name, file.type, file.size);
+      
       if (!file || !file.type.startsWith("image/")) {
         setNotification({
           isOpen: true,
@@ -255,16 +253,17 @@ const Event = ({ isAdmin = false, userId }) => {
       }
       
       setNewEvent((prev) => ({ ...prev, imageFile: file }));
+      
       setNotification({
         isOpen: true,
         title: "Image Added",
-        message: "Image file has been added successfully!",
+        message: `${file.name} has been added successfully!`,
         type: "success"
       });
     }
   };
 
-  // Image upload to Cloudinary via backend
+  // Simplified image upload (following Photowall pattern)
   const uploadImageToCloudinary = async (formData) => {
     try {
       const token = localStorage.getItem("token");
@@ -272,28 +271,29 @@ const Event = ({ isAdmin = false, userId }) => {
         throw new Error('No authentication token found. Please log in.');
       }
 
-      const uploadUrl = `${FULL_API_URL}/api/events/upload-image`;
-      console.log('🖼️ Uploading image to:', uploadUrl);
-
-      const response = await fetch(uploadUrl, {
+      const requestOptions = {
         method: 'POST',
         body: formData,
         headers: {
           'Authorization': `Bearer ${token}`
-          // Don't set Content-Type for FormData, let browser set it with boundary
         }
-      });
+      };
+
+      const uploadUrl = `${FULL_API_URL}/api/events/upload-image`;
+      console.log('🖼️ Uploading image to:', uploadUrl);
       
-      const data = await response.json();
-      console.log('📷 Image upload response:', data);
+      const response = await fetch(uploadUrl, requestOptions);
       
       if (!response.ok) {
-        throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
       
+      const data = await response.json();
+      console.log('✅ Upload successful:', data);
       return data;
     } catch (error) {
-      console.error('❌ Image upload error:', error);
+      console.error('💥 Upload error:', error);
       throw error;
     }
   };
@@ -326,16 +326,26 @@ const Event = ({ isAdmin = false, userId }) => {
     return processed;
   };
 
-  // 🟢 Add / Edit event
+  // Simplified event creation (following Photowall pattern)
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate required fields
-    if (!newEvent.title || !newEvent.date) {
+    // Validation (simplified)
+    if (!newEvent.title.trim()) {
       setNotification({
         isOpen: true,
         title: "Validation Error",
-        message: "Please fill in at least the title and date fields.",
+        message: "Please enter an event title.",
+        type: "warning"
+      });
+      return;
+    }
+
+    if (!newEvent.date) {
+      setNotification({
+        isOpen: true,
+        title: "Validation Error",
+        message: "Please select an event date.",
         type: "warning"
       });
       return;
@@ -344,20 +354,18 @@ const Event = ({ isAdmin = false, userId }) => {
     setUploading(true);
     
     try {
-      let processedData = { ...newEvent };
+      console.log('🚀 Starting event creation process...');
+      console.log('📝 Event data:', newEvent);
       
       // Handle image upload if new file is selected
+      let processedData = { ...newEvent };
+      
       if (newEvent.imageFile) {
-        setNotification({
-          isOpen: true,
-          title: "Uploading Image",
-          message: "Please wait while we upload the image...",
-          type: "info"
-        });
-
+        console.log('📋 Creating FormData for image upload...');
         const formData = new FormData();
         formData.append('image', newEvent.imageFile);
         
+        console.log('📤 Uploading image...');
         const uploadResult = await uploadImageToCloudinary(formData);
         
         if (uploadResult.success) {
@@ -367,7 +375,7 @@ const Event = ({ isAdmin = false, userId }) => {
         }
       }
       
-      // Remove imageFile from processed data before sending to backend
+      // Remove imageFile from processed data
       delete processedData.imageFile;
       
       // Process data for backend
@@ -386,7 +394,7 @@ const Event = ({ isAdmin = false, userId }) => {
         setNotification({
           isOpen: true,
           title: "Success",
-          message: `Event ${newEvent._id ? "updated" : "added"} successfully`,
+          message: `Event ${newEvent._id ? "updated" : "created"} successfully!`,
           type: "success"
         });
         
@@ -407,9 +415,11 @@ const Event = ({ isAdmin = false, userId }) => {
           status: "upcoming",
           imageFile: null
         });
+      } else {
+        throw new Error(response.message || 'Failed to save event');
       }
     } catch (error) {
-      console.error("Error saving event:", error);
+      console.error('💥 Event creation error:', error);
       setNotification({
         isOpen: true,
         title: "Error",
@@ -566,208 +576,277 @@ const Event = ({ isAdmin = false, userId }) => {
         </select>
       </div>
 
-      {/* Add/Edit Event Form */}
+      {/* Add/Edit Event Modal */}
       {showForm && isAdmin && (
-        <form className="eventpro-form" onSubmit={handleSubmit}>
-          <h3>{newEvent._id ? "Edit Event" : "Add Event"}</h3>
-          
-          <div className="eventpro-form-grid">
-            <div className="eventpro-form-field">
-              <label htmlFor="title">Event Title</label>
-              <input
-                id="title"
-                name="title"
-                placeholder="Enter event title"
-                value={newEvent.title}
-                onChange={handleInput}
-                required
-              />
-            </div>
-            
-            <div className="eventpro-form-field">
-              <label htmlFor="category">Category</label>
-              <input
-                id="category"
-                name="category"
-                placeholder="Event category"
-                value={newEvent.category}
-                onChange={handleInput}
-              />
-            </div>
-            
-            <div className="eventpro-form-field">
-              <label htmlFor="date">Event Date</label>
-              <input
-                id="date"
-                type="date"
-                name="date"
-                value={newEvent.date}
-                onChange={handleInput}
-                required
-              />
-            </div>
-            
-            <div className="eventpro-form-field">
-              <label htmlFor="time">Event Time</label>
-              <input
-                id="time"
-                type="time"
-                name="time"
-                value={newEvent.time}
-                onChange={handleInput}
-              />
-            </div>
-            
-            <div className="eventpro-form-field">
-              <label htmlFor="location">Location</label>
-              <input
-                id="location"
-                name="location"
-                placeholder="Event location"
-                value={newEvent.location}
-                onChange={handleInput}
-              />
-            </div>
-            
-            <div className="eventpro-form-field">
-              <label htmlFor="maxAttendees">Max Participants</label>
-              <input
-                id="maxAttendees"
-                name="maxAttendees"
-                type="number"
-                placeholder="Maximum attendees"
-                value={newEvent.maxAttendees}
-                onChange={handleInput}
-              />
-            </div>
-            
-            <div className="eventpro-form-field eventpro-form-full">
-              <label htmlFor="eventImage">Event Image</label>
-              <div className={`event-image-upload ${uploading ? 'uploading' : ''}`}>
-                {uploading && (
-                  <div className="event-image-upload-status">
-                    🔄 Uploading image...
-                  </div>
-                )}
-                <input
-                  type="file"
-                  id="eventImage"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="event-image-input"
-                />
-                <label
-                  htmlFor="eventImage"
-                  className={`event-image-label ${dragOver ? 'drag-over' : ''}`}
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  {!newEvent.imageFile ? (
-                    <div className="event-image-placeholder">
-                      <div className="event-image-icon">📷</div>
-                      <div className="event-image-text">
-                        <strong>Click to upload or drag and drop</strong>
-                        <span>PNG, JPG, GIF, WebP up to 5MB</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="event-image-preview">
-                      <img
-                        src={URL.createObjectURL(newEvent.imageFile)}
-                        alt="Event preview"
-                        className="event-preview-image"
-                        onLoad={() => URL.revokeObjectURL(newEvent.imageFile)}
-                      />
-                      <div className="event-image-file-info">
-                        📷 {newEvent.imageFile.name} ({(newEvent.imageFile.size / 1024 / 1024).toFixed(2)} MB)
-                      </div>
-                      <button
-                        type="button"
-                        className="event-remove-image"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          removeImageFile();
-                        }}
-                        title="Remove image"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </label>
-              </div>
-            </div>
-            
-            <div className="eventpro-form-field eventpro-form-full">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                placeholder="Describe your event details, agenda, and any important information..."
-                value={newEvent.description}
-                onChange={handleInput}
-              />
-            </div>
-            
-            <div className="eventpro-form-field eventpro-form-full">
-              <label htmlFor="registrationLink">Registration Link</label>
-              <input
-                id="registrationLink"
-                name="registrationLink"
-                placeholder="https://registration-link.com"
-                value={newEvent.registrationLink}
-                onChange={handleInput}
-              />
-            </div>
-            
-            <div className="eventpro-form-field">
-              <label htmlFor="status">Event Status</label>
-              <select
-                id="status"
-                name="status"
-                value={newEvent.status}
-                onChange={handleInput}
+        <div className="eventpro-modal-overlay" onClick={(e) => e.target.classList.contains("eventpro-modal-overlay") && setShowForm(false)}>
+          <div className="eventpro-form">
+            <div className="eventpro-form-header">
+              <div className="eventpro-form-header-icon">📅</div>
+              <h3>{newEvent._id ? "Edit Event" : "Add New Event"}</h3>
+              <button
+                className="eventpro-form-close-btn"
+                onClick={() => setShowForm(false)}
               >
-                <option value="upcoming">Upcoming</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                ✕
+              </button>
+            </div>
+            
+            <div className="eventpro-form-container">
+              <form onSubmit={handleSubmit}>
+                
+                {/* Event Basic Information Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-field">
+                    <label htmlFor="title">Event Title *</label>
+                    <div className="input-wrapper">
+                      <input
+                        id="title"
+                        name="title"
+                        type="text"
+                        placeholder="Enter event title"
+                        value={newEvent.title}
+                        onChange={handleInput}
+                        required
+                      />
+                      <span className="input-icon">📝</span>
+                    </div>
+                    <div className="input-help">Choose a compelling title for your event</div>
+                  </div>
+                </div>
+
+                {/* Event Details Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-grid">
+                    <div className="eventpro-form-field">
+                      <label htmlFor="category">Category</label>
+                      <div className="input-wrapper">
+                        <input
+                          id="category"
+                          name="category"
+                          type="text"
+                          placeholder="Event category"
+                          value={newEvent.category}
+                          onChange={handleInput}
+                        />
+                        <span className="input-icon">🏷️</span>
+                      </div>
+                    </div>
+                    
+                    <div className="eventpro-form-field">
+                      <label htmlFor="status">Event Status</label>
+                      <div className="input-wrapper">
+                        <select
+                          id="status"
+                          name="status"
+                          value={newEvent.status}
+                          onChange={handleInput}
+                        >
+                          <option value="upcoming">Upcoming</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                        <span className="input-icon">📊</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Event Date and Time Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-grid">
+                    <div className="eventpro-form-field">
+                      <label htmlFor="date">Event Date *</label>
+                      <div className="input-wrapper">
+                        <input
+                          id="date"
+                          name="date"
+                          type="date"
+                          value={newEvent.date}
+                          onChange={handleInput}
+                          required
+                        />
+                        <span className="input-icon">📅</span>
+                      </div>
+                    </div>
+                    
+                    <div className="eventpro-form-field">
+                      <label htmlFor="time">Event Time</label>
+                      <div className="input-wrapper">
+                        <input
+                          id="time"
+                          name="time"
+                          type="time"
+                          value={newEvent.time}
+                          onChange={handleInput}
+                        />
+                        <span className="input-icon">🕐</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Event Location and Capacity Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-grid">
+                    <div className="eventpro-form-field">
+                      <label htmlFor="location">Location</label>
+                      <div className="input-wrapper">
+                        <input
+                          id="location"
+                          name="location"
+                          type="text"
+                          placeholder="Event location"
+                          value={newEvent.location}
+                          onChange={handleInput}
+                        />
+                        <span className="input-icon">📍</span>
+                      </div>
+                    </div>
+                    
+                    <div className="eventpro-form-field">
+                      <label htmlFor="maxAttendees">Max Participants</label>
+                      <div className="input-wrapper">
+                        <input
+                          id="maxAttendees"
+                          name="maxAttendees"
+                          type="number"
+                          placeholder="Maximum attendees"
+                          value={newEvent.maxAttendees}
+                          onChange={handleInput}
+                          min="1"
+                        />
+                        <span className="input-icon">👥</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Event Image Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-field">
+                    <label htmlFor="eventImage">Event Image</label>
+                    <div className="file-upload-area">
+                      <input
+                        type="file"
+                        id="eventImage"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="file-input-hidden"
+                      />
+                      <label htmlFor="eventImage" className="file-upload-label">
+                        {!newEvent.imageFile ? (
+                          <>
+                            <div className="upload-icon">☁️</div>
+                            <div className="upload-text">
+                              <strong>Click to upload or drag and drop</strong>
+                              <span>PNG, JPG, GIF, WebP up to 5MB</span>
+                            </div>
+                            <div className="upload-requirements">Maximum file size: 5MB</div>
+                          </>
+                        ) : (
+                          <div className="image-preview-modern">
+                            <img
+                              src={URL.createObjectURL(newEvent.imageFile)}
+                              alt="Event preview"
+                            />
+                            <button
+                              type="button"
+                              className="remove-image-btn"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                removeImageFile();
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                    <div className="input-help">Add a compelling image to attract attendees</div>
+                  </div>
+                </div>
+
+                {/* Event Description Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-field">
+                    <label htmlFor="description">Description</label>
+                    <div className="input-wrapper">
+                      <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Describe your event details, agenda, and any important information..."
+                        value={newEvent.description}
+                        onChange={handleInput}
+                        rows="4"
+                      />
+                      <span className="input-icon textarea-icon">💭</span>
+                    </div>
+                    <div className="input-help">Tell attendees what to expect at your event</div>
+                  </div>
+                </div>
+
+                {/* Registration Link Section */}
+                <div className="eventpro-form-section">
+                  <div className="eventpro-form-field">
+                    <label htmlFor="registrationLink">Registration Link</label>
+                    <div className="input-wrapper">
+                      <input
+                        id="registrationLink"
+                        name="registrationLink"
+                        type="url"
+                        placeholder="https://registration-link.com"
+                        value={newEvent.registrationLink}
+                        onChange={handleInput}
+                      />
+                      <span className="input-icon">🔗</span>
+                    </div>
+                    <div className="input-help">Provide a link for event registration (optional)</div>
+                  </div>
+                </div>
+
+                {/* Form Actions */}
+                <div className="eventpro-form-actions">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForm(false);
+                      setNewEvent({
+                        title: "",
+                        date: "",
+                        time: "",
+                        location: "",
+                        imageUrl: "",
+                        description: "",
+                        registrationLink: "",
+                        category: "",
+                        maxAttendees: "",
+                        status: "upcoming",
+                        imageFile: null
+                      });
+                    }}
+                    disabled={uploading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="event-form-uploading-spinner"></div>
+                        {newEvent._id ? "Updating Event..." : "Creating Event..."}
+                      </>
+                    ) : (
+                      newEvent._id ? "📤 Update Event" : "🎉 Create Event"
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-          
-          <div className="eventpro-form-actions">
-            <button type="submit" className="event-form-submit-btn" disabled={uploading}>
-              {uploading ? (
-                <>
-                  <div className="event-form-uploading-spinner"></div>
-                  {newEvent._id ? "Updating Event..." : "Creating Event..."}
-                </>
-              ) : (
-                newEvent._id ? "✨ Update Event" : "🎉 Create Event"
-              )}
-            </button>
-            <button type="button" onClick={() => {
-              setShowForm(false);
-              setNewEvent({
-                title: "",
-                date: "",
-                time: "",
-                location: "",
-                imageUrl: "",
-                description: "",
-                registrationLink: "",
-                category: "",
-                maxAttendees: "",
-                status: "upcoming",
-                imageFile: null
-              });
-            }} disabled={uploading}>
-              ❌ Cancel
-            </button>
-          </div>
-        </form>
+        </div>
       )}
 
       {loading ? (
