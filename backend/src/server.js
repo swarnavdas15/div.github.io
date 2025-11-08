@@ -32,7 +32,9 @@ const allowedOrigins = [
   process.env.CLIENT_URL,                  // from Render env
   "http://localhost:5173",                 // local dev
   "https://div-github-io.vercel.app",      // main vercel domain
-  "https://div-github-io-swarnavdas.vercel.app" // backup / preview domain
+  "https://div-github-io-swarnavdas.vercel.app", // backup / preview domain
+  "https://div-github-1b30p9299-swarnav-das-projects.vercel.app", // your current vercel domain
+  "https://*.vercel.app" // wildcard for any Vercel subdomain
 ].filter(Boolean);
 
 app.use(
@@ -40,10 +42,28 @@ app.use(
     origin: function (origin, callback) {
       console.log("🔍 Request Origin:", origin);
       if (!origin) return callback(null, true); // health checks, server-side calls
+      
+      // Check exact matches first
       if (allowedOrigins.includes(origin)) {
-        console.log("✅ CORS allowed:", origin);
+        console.log("✅ CORS allowed (exact):", origin);
         return callback(null, true);
       }
+      
+      // Check wildcard patterns
+      const isAllowed = allowedOrigins.some(pattern => {
+        if (pattern.includes('*')) {
+          // Convert wildcard to regex
+          const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+          return regex.test(origin);
+        }
+        return false;
+      });
+      
+      if (isAllowed) {
+        console.log("✅ CORS allowed (wildcard):", origin);
+        return callback(null, true);
+      }
+      
       console.warn("🚫 Blocked by CORS:", origin);
       return callback(new Error("Not allowed by CORS"));
     },

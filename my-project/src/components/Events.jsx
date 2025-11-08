@@ -45,8 +45,16 @@ const Event = ({ isAdmin = false, userId }) => {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
    // API Configuration
-   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
    const FULL_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+   
+   // Debug: Log API configuration
+   console.log('🔧 API Config:', {
+     API_BASE_URL,
+     FULL_API_URL,
+     envVar: import.meta.env.VITE_API_URL,
+     currentLocation: window.location.origin
+   });
  
    // Get authentication headers
    const getAuthHeaders = (includeContentType = true) => {
@@ -66,15 +74,28 @@ const Event = ({ isAdmin = false, userId }) => {
  
    // API request helper
    const apiRequest = async (endpoint, options = {}) => {
-     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+     // Handle different endpoint types
+     let url;
+     if (endpoint.startsWith('http')) {
+       url = endpoint; // Full URL for external requests
+     } else if (endpoint.startsWith('/api/')) {
+       url = `${API_BASE_URL}${endpoint}`; // Direct API routes
+     } else {
+       url = `${API_BASE_URL}/api${endpoint}`; // Standard API routes
+     }
+     
      const config = {
        headers: getAuthHeaders(options.body instanceof FormData ? false : true),
        ...options,
      };
      
+     console.log('🌐 API Request:', { method: options.method || 'GET', url });
+     
      try {
        const response = await fetch(url, config);
        const data = await response.json();
+       
+       console.log('📊 API Response:', { status: response.status, data });
        
        if (!response.ok) {
          throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
@@ -82,7 +103,7 @@ const Event = ({ isAdmin = false, userId }) => {
        
        return data;
      } catch (error) {
-       console.error(`API Request failed for ${endpoint}:`, error);
+       console.error(`❌ API Request failed for ${endpoint}:`, error);
        throw error;
      }
    };
@@ -93,9 +114,12 @@ const Event = ({ isAdmin = false, userId }) => {
      setError(null);
      
      try {
+       console.log('📡 Starting to fetch events...');
        const response = await apiRequest('/events');
+       console.log('✅ Events fetched successfully:', response);
        setEvents(response.data || []);
      } catch (err) {
+       console.error('❌ Fetch events error:', err);
        setError(err.message);
        setEvents([]);
      } finally {
@@ -111,16 +135,43 @@ const Event = ({ isAdmin = false, userId }) => {
    const handleRetry = () => {
      fetchEvents();
    };
+
+   // Test API connection
+   const testConnection = async () => {
+     try {
+       console.log('🔍 Testing API connection...');
+       const response = await fetch(`${API_BASE_URL}/api/events`);
+       console.log('📡 Connection test response:', { status: response.status, ok: response.ok });
+       return response.ok;
+     } catch (error) {
+       console.error('❌ Connection test failed:', error);
+       return false;
+     }
+   };
+
+   // Run connection test on component mount
+   useEffect(() => {
+     const checkConnection = async () => {
+       const isConnected = await testConnection();
+       if (!isConnected) {
+         console.warn('⚠️ API connection failed, but continuing...');
+       }
+     };
+     checkConnection();
+   }, []);
  
   const handleInput = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
   };
 
-  // File upload handling
+  // File upload handling with enhanced feedback
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if (!file || !file.type.startsWith("image/")) {
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
       setNotification({
         isOpen: true,
         title: "Invalid File",
@@ -140,6 +191,15 @@ const Event = ({ isAdmin = false, userId }) => {
       });
       return;
     }
+    
+    // Show success feedback with file details
+    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+    setNotification({
+      isOpen: true,
+      title: "Image Selected",
+      message: `${file.name} (${fileSize} MB) has been selected successfully!`,
+      type: "success"
+    });
     
     setNewEvent((prev) => ({ ...prev, imageFile: file }));
   };
@@ -212,7 +272,10 @@ const Event = ({ isAdmin = false, userId }) => {
         throw new Error('No authentication token found. Please log in.');
       }
 
-      const response = await fetch(`${FULL_API_URL}/api/events/upload-image`, {
+      const uploadUrl = `${FULL_API_URL}/api/events/upload-image`;
+      console.log('🖼️ Uploading image to:', uploadUrl);
+
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
         headers: {
@@ -222,6 +285,7 @@ const Event = ({ isAdmin = false, userId }) => {
       });
       
       const data = await response.json();
+      console.log('📷 Image upload response:', data);
       
       if (!response.ok) {
         throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
@@ -229,7 +293,7 @@ const Event = ({ isAdmin = false, userId }) => {
       
       return data;
     } catch (error) {
-      console.error('Image upload error:', error);
+      console.error('❌ Image upload error:', error);
       throw error;
     }
   };
