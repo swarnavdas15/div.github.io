@@ -309,7 +309,7 @@ const PhotoWall = () => {
 
   // Helper function to check if current user has liked a photo
   const isPhotoLikedByUser = (photo) => {
-    if (!user || !photo.likedBy) return false;
+    if (!user || !user._id || !photo?.likedBy) return false;
     return photo.likedBy.includes(user._id);
   };
 
@@ -416,7 +416,7 @@ const PhotoWall = () => {
               <div className={`photo-likes ${isPhotoLikedByUser(photo) ? 'liked' : ''}`} onClick={(e) => { e.stopPropagation(); handleLike(photo._id); }}>
                 {isPhotoLikedByUser(photo) ? '💖' : '❤️'} {photo.likes}
               </div>
-              {photo.uploaderId === user._id && (
+              {user?._id && photo.uploaderId === user._id && (
                 <button className="photo-delete-btn" onClick={(e) => { e.stopPropagation(); handleDelete(photo._id); }}>🗑️</button>
               )}
             </div>
