@@ -42,7 +42,7 @@ const PhotoWall = () => {
     setError(null);
     try {
       console.log('🔍 Fetching photos from:', `${API_BASE}/api/photos`);
-      const response = await fetch(`${API_BASE}/photos`);
+      const response = await fetch(`${API_BASE}/api/photos`);
       const data = await response.json();
       console.log('📸 Photos fetch response:', data);
       if (data.success) {
