@@ -15,16 +15,8 @@ import multer from "multer";
 
 const router = express.Router();
 
-// Multer configuration for image uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/events/'); // Make sure this directory exists
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1]);
-  }
-});
+// Multer configuration for image uploads - using memory storage for Cloudinary
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
@@ -34,8 +26,8 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ 
-  storage,
+const upload = multer({
+  storage: storage,
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit

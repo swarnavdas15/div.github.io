@@ -1,5 +1,22 @@
 import Event from "../models/event.js";
 import User from "../models/User.js"; // import user model for participant update
+import { v2 as cloudinary } from 'cloudinary';
+import streamifier from 'streamifier';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Configure Cloudinary for events
+try {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  console.log('✅ Cloudinary configured successfully for events');
+} catch (error) {
+  console.error('❌ Cloudinary configuration error for events:', error);
+}
 
 // ✅ List all events (with optional type or search filters)
 export const list = async (req, res) => {
@@ -159,17 +176,44 @@ export const uploadImage = async (req, res) => {
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
-    // For now, return a mock image URL since we don't have Cloudinary setup
-    // In production, you would upload to Cloudinary, AWS S3, or similar service
-    const imageUrl = `/uploads/events/${req.file.filename}`;
+    console.log('✅ Starting Cloudinary upload for event image...');
+
+    // Upload to Cloudinary
+    const streamUpload = (buffer) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'events',
+            transformation: [
+              { width: 800, height: 600, crop: 'limit', quality: 'auto:good' }
+            ],
+            resource_type: 'auto'
+          },
+          (error, result) => {
+            if (result) {
+              console.log('✅ Cloudinary upload successful:', result.secure_url);
+              resolve(result);
+            } else {
+              console.error('❌ Cloudinary upload error:', error);
+              reject(error);
+            }
+          }
+        );
+        streamifier.createReadStream(buffer).pipe(stream);
+      });
+    };
+
+    const result = await streamUpload(req.file.buffer);
+    
+    const imageUrl = result.secure_url;
     
     res.json({
       success: true,
-      message: "Image uploaded successfully",
+      message: "Image uploaded successfully to Cloudinary",
       data: { imageUrl }
     });
   } catch (err) {
-    console.error("Error uploading image:", err);
+    console.error("Error uploading image to Cloudinary:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

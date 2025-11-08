@@ -44,6 +44,9 @@ const Event = ({ isAdmin = false, userId }) => {
   });
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+   const getApiUrl = () => {
+    return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  };
 
   // 🟢 Fetch events from backend
   useEffect(() => {
@@ -52,8 +55,7 @@ const Event = ({ isAdmin = false, userId }) => {
       setError(null);
       
       try {
-        const apiUrl = getApiUrl();
-        const res = await fetch(`${apiUrl}/events`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`);
         const data = await res.json();
         
         if (res.ok) {
@@ -77,7 +79,7 @@ const Event = ({ isAdmin = false, userId }) => {
     setLoading(true);
     setError(null);
     
-    fetch(`${apiUrl}/events`)
+    fetch(`${apiUrl}/api/events`)
       .then((res) => res.json())
       .then((data) => {
         if (res.ok) {
@@ -100,10 +102,7 @@ const Event = ({ isAdmin = false, userId }) => {
   };
 
   // Get API base URL
-  const getApiUrl = () => {
-    return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  };
-
+ 
   const handleInput = (e) => {
     const { name, value } = e.target;
     setNewEvent((prev) => ({ ...prev, [name]: value }));
@@ -212,7 +211,7 @@ const Event = ({ isAdmin = false, userId }) => {
         }
       };
 
-      const response = await fetch(`${getApiUrl()}/events/upload-image`, requestOptions);
+      const response = await fetch(`${getApiUrl()}/api/events/upload-image`, requestOptions);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
@@ -305,8 +304,8 @@ const Event = ({ isAdmin = false, userId }) => {
       const method = newEvent._id ? "PUT" : "POST";
       const apiUrl = getApiUrl();
       const url = newEvent._id
-        ? `${apiUrl}/events/${newEvent._id}`
-        : `${apiUrl}/events`;
+        ? `${apiUrl}/api/events/${newEvent._id}`
+        : `${apiUrl}/api/events`;
       
       console.log('Sending data to:', url);
       console.log('Data being sent:', processedData);
@@ -330,7 +329,7 @@ const Event = ({ isAdmin = false, userId }) => {
         });
         
         // Refresh events list
-        const response = await fetch(`${apiUrl}/events`);
+        const response = await fetch(`${apiUrl}/api/events`);
         const eventsData = await response.json();
         setEvents(eventsData.data || []);
         
@@ -378,7 +377,7 @@ const Event = ({ isAdmin = false, userId }) => {
       onConfirm: async () => {
         try {
           const apiUrl = getApiUrl();
-          const res = await fetch(`${apiUrl}/events/${id}`, {
+          const res = await fetch(`${apiUrl}/api/events/${id}`, {
             method: "DELETE",
             headers: getAuthHeaders(),
           });
@@ -425,7 +424,7 @@ const Event = ({ isAdmin = false, userId }) => {
         const updated = { ...event, registrationLink: "" };
         try {
           const apiUrl = getApiUrl();
-          await fetch(`${apiUrl}/events/${event._id}`, {
+          await fetch(`${apiUrl}/api/events/${event._id}`, {
             method: "PUT",
             headers: getAuthHeaders(),
             body: JSON.stringify(updated),
