@@ -31,6 +31,12 @@ const EventCard = ({
 
   const isValidImageUrl = (url) => {
     if (!url) return false;
+    
+    // Check for relative paths (like /uploads/...)
+    if (url.startsWith('/uploads/') || url.startsWith('./uploads/')) {
+      return true;
+    }
+    
     try {
       new URL(url);
       
