@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import "../../styles/events.css";
 
-const EventModal = ({ event, onClose }) => {
+const EventModal = ({ event, onClose, userId }) => {
   const [imageError, setImageError] = useState(false);
   
+  // Add null safety check for event
+  if (!event) {
+    return null;
+  }
+  
   const formatDate = (date) => {
+    if (!date) return 'Date not specified';
     const d = new Date(date);
     return d.toLocaleDateString("en-GB", {
       day: "numeric",
@@ -49,7 +55,7 @@ const EventModal = ({ event, onClose }) => {
   };
 
   const getImageSrc = () => {
-    if (event.imageUrl && isValidImageUrl(event.imageUrl) && !imageError) {
+    if (event?.imageUrl && isValidImageUrl(event.imageUrl) && !imageError) {
       return event.imageUrl;
     }
     return "https://source.unsplash.com/600x400/?event";
@@ -60,10 +66,10 @@ const EventModal = ({ event, onClose }) => {
       <div className="eventpro-modal" onClick={(e) => e.stopPropagation()}>
         {/* Modal Header with Image */}
         <div className="eventpro-modal-header">
-          {event.imageUrl && isValidImageUrl(event.imageUrl) && !imageError ? (
+          {event?.imageUrl && isValidImageUrl(event.imageUrl) && !imageError ? (
             <img
               src={event.imageUrl}
-              alt={event.title}
+              alt={event?.title || 'Event'}
               onError={handleImageError}
             />
           ) : (
@@ -71,20 +77,20 @@ const EventModal = ({ event, onClose }) => {
               <span>No Image Available</span>
             </div>
           )}
-          <span className="eventpro-badge">{event.category}</span>
+          <span className="eventpro-badge">{event?.category || 'General'}</span>
           <button className="eventpro-close" onClick={onClose}>✕</button>
         </div>
         
         {/* Modal Content */}
         <div className="eventpro-modal-content">
-          <h3>{event.title}</h3>
-          <p><strong>Date:</strong> {formatDate(event.date)}</p>
-          <p><strong>Time:</strong> {event.time}</p>
-          <p><strong>Location:</strong> {event.location}</p>
-          <p className="eventpro-description">{event.description}</p>
+          <h3>{event?.title || 'Untitled Event'}</h3>
+          <p><strong>Date:</strong> {formatDate(event?.date)}</p>
+          <p><strong>Time:</strong> {event?.time || 'Time not specified'}</p>
+          <p><strong>Location:</strong> {event?.location || 'Location not specified'}</p>
+          <p className="eventpro-description">{event?.description || 'No description available'}</p>
           
           <div className="eventpro-actions">
-            {event.registrationLink ? (
+            {event?.registrationLink ? (
               <a href={event.registrationLink} target="_blank" rel="noreferrer">
                 📝 Register Now
               </a>
