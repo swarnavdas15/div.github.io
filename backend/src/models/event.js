@@ -18,4 +18,4 @@ const EventSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.models?.Event || mongoose.model("Event", EventSchema);
+export default mongoose.models.Event ? mongoose.models.Event : mongoose.model("Event", EventSchema);
