@@ -644,6 +644,11 @@ const Event = ({ isAdmin = false, userId }) => {
             <div className="eventpro-form-field eventpro-form-full">
               <label htmlFor="eventImage">Event Image</label>
               <div className={`event-image-upload ${uploading ? 'uploading' : ''}`}>
+                {uploading && (
+                  <div className="event-image-upload-status">
+                    🔄 Uploading image...
+                  </div>
+                )}
                 <input
                   type="file"
                   id="eventImage"
@@ -675,6 +680,9 @@ const Event = ({ isAdmin = false, userId }) => {
                         className="event-preview-image"
                         onLoad={() => URL.revokeObjectURL(newEvent.imageFile)}
                       />
+                      <div className="event-image-file-info">
+                        📷 {newEvent.imageFile.name} ({(newEvent.imageFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
                       <button
                         type="button"
                         className="event-remove-image"
