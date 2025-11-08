@@ -11,7 +11,6 @@ export const protect = async (req, res, next) => {
     "/favicon.ico",
     "/",
     "/api/auth",
-    "/api/events",
     "/api/photos",
     "/api/projects",
     "/api/contact",
