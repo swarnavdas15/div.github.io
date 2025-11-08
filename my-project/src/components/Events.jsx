@@ -44,64 +44,73 @@ const Event = ({ isAdmin = false, userId }) => {
   });
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-   const getApiUrl = () => {
-    return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  };
-
-  // 🟢 Fetch events from backend
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`);
-        const data = await res.json();
-        
-        if (res.ok) {
-          setEvents(data.data || []);
-        } else {
-          throw new Error(data.message || 'Failed to fetch events');
-        }
-      } catch (err) {
-        setError(err.message);
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchEvents();
-  }, []);
-  
-  const handleRetry = () => {
-    const apiUrl = getApiUrl();
-    setLoading(true);
-    setError(null);
-    
-    fetch(`${apiUrl}/api/events`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (res.ok) {
-          setEvents(data.data || []);
-        } else {
-          throw new Error(data.message || 'Failed to fetch events');
-        }
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  };
-
-  // Get token for authenticated requests
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`
-    };
-  };
-
-  // Get API base URL
+   // API Configuration
+   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+   const FULL_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+ 
+   // Get authentication headers
+   const getAuthHeaders = (includeContentType = true) => {
+     const token = localStorage.getItem("token");
+     const headers = {};
+     
+     if (includeContentType) {
+       headers["Content-Type"] = "application/json";
+     }
+     
+     if (token) {
+       headers["Authorization"] = `Bearer ${token}`;
+     }
+     
+     return headers;
+   };
+ 
+   // API request helper
+   const apiRequest = async (endpoint, options = {}) => {
+     const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+     const config = {
+       headers: getAuthHeaders(options.body instanceof FormData ? false : true),
+       ...options,
+     };
+     
+     try {
+       const response = await fetch(url, config);
+       const data = await response.json();
+       
+       if (!response.ok) {
+         throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+       }
+       
+       return data;
+     } catch (error) {
+       console.error(`API Request failed for ${endpoint}:`, error);
+       throw error;
+     }
+   };
+ 
+   // 🟢 Fetch events from backend
+   const fetchEvents = async () => {
+     setLoading(true);
+     setError(null);
+     
+     try {
+       const response = await apiRequest('/events');
+       setEvents(response.data || []);
+     } catch (err) {
+       setError(err.message);
+       setEvents([]);
+     } finally {
+       setLoading(false);
+     }
+   };
+ 
+   useEffect(() => {
+     fetchEvents();
+   }, []);
+ 
+   // Retry function with consistent pattern
+   const handleRetry = () => {
+     fetchEvents();
+   };
  
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -203,22 +212,21 @@ const Event = ({ isAdmin = false, userId }) => {
         throw new Error('No authentication token found. Please log in.');
       }
 
-      const requestOptions = {
+      const response = await fetch(`${FULL_API_URL}/api/events/upload-image`, {
         method: 'POST',
         body: formData,
         headers: {
           'Authorization': `Bearer ${token}`
+          // Don't set Content-Type for FormData, let browser set it with boundary
         }
-      };
-
-      const response = await fetch(`${getApiUrl()}/api/events/upload-image`, requestOptions);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
+      });
       
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       return data;
     } catch (error) {
       console.error('Image upload error:', error);
@@ -301,26 +309,16 @@ const Event = ({ isAdmin = false, userId }) => {
       // Process data for backend
       processedData = processEventData(processedData);
       
-      const method = newEvent._id ? "PUT" : "POST";
-      const apiUrl = getApiUrl();
-      const url = newEvent._id
-        ? `${apiUrl}/api/events/${newEvent._id}`
-        : `${apiUrl}/api/events`;
+      // Use consistent API pattern
+      const endpoint = newEvent._id ? `/events/${newEvent._id}` : '/events';
+      const method = newEvent._id ? 'PUT' : 'POST';
       
-      console.log('Sending data to:', url);
-      console.log('Data being sent:', processedData);
-      
-      const res = await fetch(url, {
+      const response = await apiRequest(endpoint, {
         method,
-        headers: getAuthHeaders(),
-        body: JSON.stringify(processedData),
+        body: JSON.stringify(processedData)
       });
       
-      console.log('Response status:', res.status);
-      const data = await res.json();
-      console.log('Response data:', data);
-      
-      if (data.success) {
+      if (response.success) {
         setNotification({
           isOpen: true,
           title: "Success",
@@ -329,9 +327,7 @@ const Event = ({ isAdmin = false, userId }) => {
         });
         
         // Refresh events list
-        const response = await fetch(`${apiUrl}/api/events`);
-        const eventsData = await response.json();
-        setEvents(eventsData.data || []);
+        await fetchEvents();
         
         setShowForm(false);
         setNewEvent({
@@ -346,13 +342,6 @@ const Event = ({ isAdmin = false, userId }) => {
           maxAttendees: "",
           status: "upcoming",
           imageFile: null
-        });
-      } else {
-        setNotification({
-          isOpen: true,
-          title: "Error",
-          message: data.message || "Failed to save event",
-          type: "error"
         });
       }
     } catch (error) {
@@ -376,14 +365,11 @@ const Event = ({ isAdmin = false, userId }) => {
       message: "Are you sure you want to delete this event? This action cannot be undone.",
       onConfirm: async () => {
         try {
-          const apiUrl = getApiUrl();
-          const res = await fetch(`${apiUrl}/api/events/${id}`, {
-            method: "DELETE",
-            headers: getAuthHeaders(),
+          const response = await apiRequest(`/events/${id}`, {
+            method: 'DELETE'
           });
-          const data = await res.json();
           
-          if (data.success) {
+          if (response.success) {
             setEvents(events.filter((e) => e._id !== id));
             setNotification({
               isOpen: true,
@@ -391,20 +377,13 @@ const Event = ({ isAdmin = false, userId }) => {
               message: "Event deleted successfully",
               type: "success"
             });
-          } else {
-            setNotification({
-              isOpen: true,
-              title: "Error",
-              message: data.message || "Failed to delete event",
-              type: "error"
-            });
           }
         } catch (error) {
           console.error("Error deleting event:", error);
           setNotification({
             isOpen: true,
-            title: "Network Error",
-            message: "Network error. Please try again.",
+            title: "Error",
+            message: error.message || "Failed to delete event. Please try again.",
             type: "error"
           });
         }
@@ -423,12 +402,11 @@ const Event = ({ isAdmin = false, userId }) => {
       onConfirm: async () => {
         const updated = { ...event, registrationLink: "" };
         try {
-          const apiUrl = getApiUrl();
-          await fetch(`${apiUrl}/api/events/${event._id}`, {
-            method: "PUT",
-            headers: getAuthHeaders(),
-            body: JSON.stringify(updated),
+          await apiRequest(`/events/${event._id}`, {
+            method: 'PUT',
+            body: JSON.stringify(updated)
           });
+          
           setNotification({
             isOpen: true,
             title: "Success",
@@ -442,8 +420,8 @@ const Event = ({ isAdmin = false, userId }) => {
           console.error("Error deactivating registration:", error);
           setNotification({
             isOpen: true,
-            title: "Network Error",
-            message: "Network error. Please try again.",
+            title: "Error",
+            message: error.message || "Failed to deactivate registration. Please try again.",
             type: "error"
           });
         }
