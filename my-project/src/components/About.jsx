@@ -16,8 +16,8 @@ export default function About() {
   const teamMembers = [
     {
       id: 1,
-      name: "Md. Uvaish",
-      role: "Student Coordinator",
+      name: "Nilesh Gupta",
+      role: "Faculty Coordinator",
       img: "https://img.freepik.com/free-photo/portrait-handsome-young-man-makes-okay-gesture-demonstrates-agreement-likes-idea-smiles-happily-wears-optical-glasses-yellow-hat-t-shirt-models-indoor-its-fine-thank-you-hand-sign_273609-30676.jpg?size=626&ext=jpg",
       linkedin: "https://linkedin.com/in/uvaish",
       github: "https://github.com/uvaish",
@@ -25,6 +25,24 @@ export default function About() {
     },
     {
       id: 2,
+      name: "Dr. Shanu Kuttan",
+      role: "HOD CSE",
+      img: "https://img.freepik.com/free-photo/portrait-handsome-young-man-makes-okay-gesture-demonstrates-agreement-likes-idea-smiles-happily-wears-optical-glasses-yellow-hat-t-shirt-models-indoor-its-fine-thank-you-hand-sign_273609-30676.jpg?size=626&ext=jpg",
+      linkedin: "https://linkedin.com/in/uvaish",
+      github: "https://github.com/uvaish",
+      email: "mailto:uvaish@example.com",
+    },
+    {
+      id: 3,
+      name: "Chandrabhan Mahato",
+      role: "President",
+      img: "https://img.freepik.com/free-photo/portrait-handsome-young-man-makes-okay-gesture-demonstrates-agreement-likes-idea-smiles-happily-wears-optical-glasses-yellow-hat-t-shirt-models-indoor-its-fine-thank-you-hand-sign_273609-30676.jpg?size=626&ext=jpg",
+      linkedin: "https://linkedin.com/in/uvaish",
+      github: "https://github.com/uvaish",
+      email: "mailto:uvaish@example.com",
+    },
+    {
+      id: 4,
       name: "B. Jyotsana",
       role: "Vice President",
       img: "https://image.freepik.com/free-photo/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair_285396-896.jpg",
@@ -33,7 +51,7 @@ export default function About() {
       email: "mailto:jyotsana@example.com",
     },
     {
-      id: 3,
+      id: 5,
       name: "Swarnav Das",
       role: "Tech Head",
       img: "https://image.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg",
@@ -42,7 +60,7 @@ export default function About() {
       email: "mailto:swarnav@example.com",
     },
     {
-      id: 4,
+      id: 6,
       name: "Deepak Kumar",
       role: "Admin Head",
       img: "https://image.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg",
@@ -50,6 +68,16 @@ export default function About() {
       github: "https://github.com/deepak",
       email: "mailto:deepak@example.com",
     },
+    {
+      id: 7,
+      name: "Md. Uvaish",
+      role: "Student Coordinator",
+      img: "https://img.freepik.com/free-photo/portrait-handsome-young-man-makes-okay-gesture-demonstrates-agreement-likes-idea-smiles-happily-wears-optical-glasses-yellow-hat-t-shirt-models-indoor-its-fine-thank-you-hand-sign_273609-30676.jpg?size=626&ext=jpg",
+      linkedin: "https://linkedin.com/in/uvaish",
+      github: "https://github.com/uvaish",
+      email: "mailto:uvaish@example.com",
+    },
+    
   ];
 
   const openAboutModal = () => {
