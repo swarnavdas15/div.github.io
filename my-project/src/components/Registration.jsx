@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../styles/registration.css";
 
-export default function Registration({ closeModal, openLogin }) {
+export default function Registration({ closeModal, openLogin, onLoginSuccess }) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -60,6 +60,49 @@ export default function Registration({ closeModal, openLogin }) {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+const handleOAuthLogin = async (provider) => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    
+    // First check if OAuth is configured by making a test request
+    try {
+      const testResponse = await fetch(`${apiUrl}/api/auth/${provider}`, {
+        method: 'HEAD',
+        mode: 'no-cors'
+      });
+      
+      // If we get here without error, OAuth might be configured
+      const width = 600;
+      const height = 400;
+      const left = (window.screen.width / 2) - (width / 2);
+      const top = (window.screen.height / 2) - (height / 2);
+      
+      const popup = window.open(
+        `${apiUrl}/api/auth/${provider}`,
+        `${provider}_login`,
+        `width=${width},height=${height},top=${top},left=${left}`
+      );
+
+      // Listen for the popup to close and check if we got a token
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          // Check if we have a token in localStorage (user logged in)
+          const token = localStorage.getItem('token');
+          const user = localStorage.getItem('user');
+          if (token && user) {
+            const userData = JSON.parse(user);
+            if (onLoginSuccess) onLoginSuccess(userData);
+            closeModal?.();
+          }
+        }
+      }, 1000);
+    } catch (error) {
+      // OAuth is likely not configured
+      const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+      setError(`${providerName} OAuth is not configured. Please contact administrator.`);
     }
   };
 
@@ -170,8 +213,22 @@ export default function Registration({ closeModal, openLogin }) {
           </button>
         </form>
 
+        <div className="divider"><span>Or continue with</span></div>
+
+        <div className="social-buttons">
+          <button className="social-btn google" onClick={() => handleOAuthLogin('google')}>
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" />
+          </button>
+          <button className="social-btn github" onClick={() => handleOAuthLogin('github')}>
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" />
+          </button>
+          <button className="social-btn linkedin" onClick={() => handleOAuthLogin('linkedin')}>
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="LinkedIn" />
+          </button>
+        </div>
+
         <p className="login-link">
-          Already have an account?{" "}
+          Already register :{" "}
           <a
             href="#login"
             onClick={(e) => {
@@ -180,7 +237,7 @@ export default function Registration({ closeModal, openLogin }) {
               openLogin?.();
             }}
           >
-            Log in
+            Login Now
           </a>
         </p>
       </div>

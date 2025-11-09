@@ -8,6 +8,7 @@ import {
   sendMessage,
   getAllMessages,
   deleteMessage,
+  uploadResource,
 } from "../controllers/adminController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 
@@ -21,5 +22,6 @@ router.put("/members/:id/password", protect, adminOnly, changeMemberPassword);
 router.post("/messages", protect, adminOnly, sendMessage);
 router.get("/messages", protect, adminOnly, getAllMessages);
 router.delete("/messages/:memberId/:messageId", protect, adminOnly, deleteMessage);
+router.post("/resources", protect, adminOnly, uploadResource);
 
 export default router;

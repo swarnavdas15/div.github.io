@@ -30,7 +30,7 @@ const AdminDashboard = ({ onClose }) => {
       
       // Calculate stats
       const total = membersList.length;
-      const active = membersList.filter(m => m.status === 'active').length;
+      const active = membersList.filter(m => m.isActive === true).length;
       const recent = membersList.filter(m => {
         const createdAt = new Date(m.createdAt);
         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

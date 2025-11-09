@@ -44,13 +44,49 @@ const Navbar = ({
     // Check if it's a hash link (section on same page)
     if (href.startsWith("#")) {
       const hash = href.substring(1);
-      const section = document.getElementById(hash);
-      if (section) section.scrollIntoView({ behavior: "smooth" });
+      
+      // Function to scroll to section
+      const scrollToSection = () => {
+        const section = document.getElementById(hash);
+        if (section) {
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        } else {
+          console.log(`Element with id '${hash}' not found`);
+        }
+      };
+      
+      // Try immediately, then with a small delay
+      scrollToSection();
+      setTimeout(scrollToSection, 100);
+      
     } else {
       // It's a route link, navigate to it
       navigate(href);
     }
   };
+
+  // Handle hash navigation on page load
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      const scrollToHash = () => {
+        const section = document.getElementById(hash);
+        if (section) {
+          section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+      };
+      
+      // Try after a short delay to ensure component is mounted
+      const timer = setTimeout(scrollToHash, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // ✅ role-based dashboard redirection
   const handleDashboard = () => {

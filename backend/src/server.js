@@ -2,7 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import multer from 'multer';
+import passport from 'passport';
 import connectDB from './config/db.js';
+import './config/oauth.js'; // Import OAuth configuration
 
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
@@ -16,6 +18,9 @@ import { protect, adminOnly } from './middleware/authMiddleware.js'; // ✅ incl
 dotenv.config();
 const app = express();
 connectDB();
+
+// Initialize passport
+app.use(passport.initialize());
 
 // 🧩 Middleware
 app.use(express.json());

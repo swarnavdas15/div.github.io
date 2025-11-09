@@ -13,7 +13,6 @@
   backdrop-filter: blur(4px);
   padding: 1rem;
   box-sizing: border-box;
-  scrollbar-width: none;
 }
 
 /* Modal Content - Responsive Sizing with Compact Height */
@@ -80,11 +79,11 @@
   background: #d36a89;
 }
 
-/* Registration Styles - Compact */
-.registration-container {
+/* Login Styles - Compact */
+.login-container {
   display: flex;
   width: 100%;
-  height: 90%;
+  height: 70%;
   background: linear-gradient(135deg, #ea8966 0%, #a2714b 100%);
   border-radius: 20px;
   overflow: hidden;
@@ -94,25 +93,25 @@
 }
 
 /* Image section with overlay */
-.registration-image {
+.login-image {
   flex: 1.2;
   min-width: 0;
-  background: linear-gradient(135deg, #ea8966 0%, #a2714b 100%);
+  background: linear-gradient(45deg, #667eea, #764ba2);
   position: relative;
 }
 
-.registration-image::before {
+.login-image::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #82635839 0%, #a2714b47 100%);
+  background: linear-gradient(135deg, rgba(243, 219, 204, 0.036) 0%, rgba(95, 64, 45, 0.678) 100%);
   z-index: 1;
 }
 
-.registration-image img {
+.login-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -121,7 +120,7 @@
 }
 
 /* Form section with glass morphism */
-.registration-box {
+.login-box {
   flex: 1;
   padding: 2rem;
   max-width: 500px;
@@ -133,12 +132,10 @@
   backdrop-filter: blur(20px);
   position: relative;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(#a0bef1);
   height: 100%;
 }
 
-.registration-box::before {
+.login-box::before {
   content: '';
   position: absolute;
   top: 0;
@@ -149,13 +146,13 @@
   z-index: -1;
 }
 
-.registration-header {
+.login-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   position: relative;
 }
 
-.registration-header h1 {
+.login-header h1 {
   font-size: 1.75rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -166,7 +163,7 @@
   letter-spacing: -0.02em;
 }
 
-.registration-header p {
+.login-header p {
   color: #5a6c7d;
   font-size: 0.9rem;
   font-weight: 500;
@@ -198,17 +195,17 @@
 }
 
 /* Form styling - Compact */
-.registration-form {
+.login-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.registration-form label {
+.login-form label {
   display: block;
 }
 
-.registration-form span {
+.login-form span {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -217,7 +214,7 @@
   letter-spacing: 0.025em;
 }
 
-.registration-form input {
+.login-form input {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 2px solid #e2e8f0;
@@ -230,7 +227,7 @@
   font-weight: 500;
 }
 
-.registration-form input:focus {
+.login-form input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
@@ -238,7 +235,7 @@
   transform: translateY(-1px);
 }
 
-.registration-form input::placeholder {
+.login-form input::placeholder {
   color: #a0aec0;
   font-weight: 400;
 }
@@ -268,10 +265,10 @@
   transform: translateY(-50%) scale(1.1);
 }
 
-.register-button {
+.login-button {
   width: 100%;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #d08a4dc9 0%, #d76b19 100%);
+  background: linear-gradient(135deg, #cc7c4b 0%, #d98739 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -286,7 +283,7 @@
   letter-spacing: 0.05em;
 }
 
-.register-button::before {
+.login-button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -297,16 +294,16 @@
   transition: left 0.5s;
 }
 
-.register-button:hover {
+.login-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
 }
 
-.register-button:hover::before {
+.login-button:hover::before {
   left: 100%;
 }
 
-.register-button:active {
+.login-button:active {
   transform: translateY(0);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
@@ -427,28 +424,28 @@
   color: #e67e9c;
 }
 
-.terms, .login-link {
+.log-terms, .log-login-link {
   text-align: center;
   font-size: 0.9rem;
   color: #4a5568;
-  margin-bottom: 2.75rem;
+  margin-bottom: 0.75rem;
   line-height: 1.5;
   font-weight: 500;
 }
 
-.terms a, .login-link a {
-  color: #667eea;
+.log-terms a, .log-login-link a {
+  color: #e47615;
   text-decoration: none;
   font-weight: 700;
   position: relative;
   transition: all 0.3s ease;
 }
 
-.terms a:hover, .login-link a:hover {
-  color: #764ba2;
+.log-terms a:hover, .log-login-link a:hover {
+  color: #9b6945;
 }
 
-.terms a::after, .login-link a::after {
+.log-terms a::after, .log-login-link a::after {
   content: '';
   position: absolute;
   bottom: -2px;
@@ -459,7 +456,7 @@
   transition: width 0.3s ease;
 }
 
-.terms a:hover::after, .login-link a:hover::after {
+.log-terms a:hover::after, .log-login-link a:hover::after {
   width: 100%;
 }
 
@@ -516,13 +513,13 @@ body.modal-open {
 }
 
 /* Loading state for form submission */
-.registration-form.submitting .register-button {
+.login-form.submitting .login-button {
   opacity: 0.7;
   cursor: not-allowed;
   position: relative;
 }
 
-.registration-form.submitting .register-button::after {
+.login-form.submitting .login-button::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -555,36 +552,36 @@ body.modal-open {
     border-radius: 16px;
   }
   
-  .registration-container {
+  .login-container {
     max-width: 100%;
     max-height: 500px;
     border-radius: 16px;
   }
   
-  .registration-box {
+  .login-box {
     padding: 1.5rem;
     max-width: 100%;
     justify-content: flex-start;
   }
   
-  .registration-header {
+  .login-header {
     margin-bottom: 1.25rem;
   }
   
-  .registration-header h1 {
+  .login-header h1 {
     font-size: 1.5rem;
   }
   
-  .registration-form {
+  .login-form {
     gap: 0.875rem;
   }
   
-  .registration-form input {
+  .login-form input {
     padding: 0.6875rem;
     font-size: 0.9rem;
   }
   
-  .register-button {
+  .login-button {
     padding: 0.75rem;
     font-size: 0.95rem;
   }
@@ -612,7 +609,7 @@ body.modal-open {
     min-height: 50vh;
   }
   
-  .registration-container {
+  .login-container {
     flex-direction: column;
     max-width: 100%;
     max-height: 450px;
@@ -620,12 +617,12 @@ body.modal-open {
     min-height: 50vh;
   }
   
-  .registration-image {
+  .login-image {
     min-height: 100px;
     flex: none;
   }
   
-  .registration-box {
+  .login-box {
     padding: 1.25rem;
     max-width: 100%;
     flex: 1;
@@ -635,19 +632,19 @@ body.modal-open {
     overflow-y: auto;
   }
   
-  .registration-header {
+  .login-header {
     margin-bottom: 1rem;
   }
   
-  .registration-header h1 {
+  .login-header h1 {
     font-size: 1.3rem;
   }
   
-  .registration-header p {
+  .login-header p {
     font-size: 0.85rem;
   }
   
-  .registration-form {
+  .login-form {
     gap: 0.75rem;
   }
   
@@ -674,44 +671,44 @@ body.modal-open {
     min-height: 45vh;
   }
   
-  .registration-container {
+  .login-container {
     border-radius: 12px;
     max-height: 400px;
     min-height: 45vh;
   }
   
-  .registration-image {
+  .login-image {
     min-height: 80px;
   }
   
-  .registration-box {
+  .login-box {
     padding: 1rem;
     flex: 1;
     justify-content: flex-start;
   }
   
-  .registration-header {
+  .login-header {
     margin-bottom: 0.875rem;
   }
   
-  .registration-header h1 {
+  .login-header h1 {
     font-size: 1.2rem;
   }
   
-  .registration-header p {
+  .login-header p {
     font-size: 0.8rem;
   }
   
-  .registration-form {
+  .login-form {
     gap: 0.6875rem;
   }
   
-  .registration-form input {
+  .login-form input {
     padding: 0.625rem;
     font-size: 0.85rem;
   }
   
-  .register-button {
+  .login-button {
     padding: 0.6875rem;
     font-size: 0.9rem;
   }
@@ -733,7 +730,7 @@ body.modal-open {
     font-size: 0.8rem;
   }
   
-  .terms, .login-link {
+  .log-terms, .log-login-link {
     font-size: 0.85rem;
   }
   
@@ -760,43 +757,43 @@ body.modal-open {
     min-height: 45vh;
   }
   
-  .registration-container {
+  .login-container {
     max-height: 450px;
     min-height: 45vh;
   }
   
-  .registration-image {
+  .login-image {
     min-height: 80px;
   }
   
-  .registration-box {
+  .login-box {
     padding: 1rem;
     flex: 1;
     justify-content: flex-start;
   }
   
-  .registration-header {
+  .login-header {
     margin-bottom: 1rem;
   }
   
-  .registration-header h1 {
+  .login-header h1 {
     font-size: 1.1rem;
   }
   
-  .registration-header p {
+  .login-header p {
     font-size: 0.85rem;
   }
   
-  .registration-form {
+  .login-form {
     gap: 0.875rem;
   }
   
-  .registration-form input {
+  .login-form input {
     padding: 0.625rem;
     font-size: 0.875rem;
   }
   
-  .register-button {
+  .login-button {
     padding: 0.75rem;
     font-size: 0.9rem;
   }
@@ -820,7 +817,7 @@ body.modal-open {
     height: 16px;
   }
   
-  .terms, .login-link {
+  .log-terms, .log-login-link {
     font-size: 0.8rem;
   }
   
@@ -832,7 +829,7 @@ body.modal-open {
 
 /* Touch Device Optimizations */
 @media (hover: none) and (pointer: coarse) {
-  .register-button:hover {
+  .login-button:hover {
     transform: none;
     box-shadow: none;
   }
@@ -847,7 +844,7 @@ body.modal-open {
     color: #666;
   }
   
-  .registration-form input:focus {
+  .login-form input:focus {
     box-shadow: 0 0 0 2px rgba(230, 126, 156, 0.2);
   }
 }
@@ -858,7 +855,7 @@ body.modal-open {
     border: 0.5px solid rgba(0, 0, 0, 0.1);
   }
   
-  .registration-container {
+  .login-container {
     border: 0.5px solid rgba(0, 0, 0, 0.05);
   }
 }
@@ -874,24 +871,24 @@ body.modal-open {
     max-height: 95vh;
   }
   
-  .registration-container {
+  .login-container {
     max-height: 90vh;
   }
   
-  .registration-box {
+  .login-box {
     padding: 1rem 1.5rem;
     overflow-y: auto;
   }
   
-  .registration-header {
+  .login-header {
     margin-bottom: 1rem;
   }
   
-  .registration-header h1 {
+  .login-header h1 {
     font-size: 1.125rem;
   }
   
-  .registration-form {
+  .login-form {
     gap: 0.75rem;
   }
   
@@ -910,11 +907,11 @@ body.modal-open {
     max-width: 1000px;
   }
   
-  .registration-container {
+  .login-container {
     max-width: 1000px;
   }
   
-  .registration-box {
+  .login-box {
     max-width: 500px;
   }
 }

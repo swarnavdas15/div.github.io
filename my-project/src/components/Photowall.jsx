@@ -116,12 +116,19 @@ const PhotoWall = () => {
         return;
       }
 
-      console.log('❤️ Toggling like for photo:', photoId);
+      const userData = getUser();
+      if (!userData || !userData.id) {
+        alert('Please log in again to like photos.');
+        return;
+      }
+
+      console.log('❤️ Toggling like for photo:', photoId, 'by user:', userData.id);
       
       const response = await fetch(`${API_BASE}/api/photos/${photoId}/toggle-like`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
@@ -129,40 +136,35 @@ const PhotoWall = () => {
       
       if (data.success) {
         // Update photos state with new like data
-        setPhotos(photos.map(p => {
+        setPhotos(prevPhotos => prevPhotos.map(p => {
           if (p._id === photoId) {
             return {
               ...p,
               likes: data.data.likes,
-              likedBy: data.data.likedBy,
-              isLiked: data.data.isLiked
+              likedBy: data.data.likedBy
             };
           }
           return p;
         }));
         
-        // Also update localStorage with new like data
-        const updatedPhotos = photos.map(p => {
-          if (p._id === photoId) {
-            return {
-              ...p,
-              likes: data.data.likes,
-              likedBy: data.data.likedBy,
-              isLiked: data.data.isLiked
-            };
-          }
-          return p;
-        });
-        localStorage.setItem('photoWallPhotos', JSON.stringify(updatedPhotos));
-        
         console.log('❤️ Like updated successfully:', data.data);
       } else {
         console.error('Like toggle failed:', data.message);
-        alert(data.message || 'Failed to update like');
+        if (data.message.includes('not found')) {
+          alert('This photo no longer exists. Please refresh the page.');
+          // Refresh photos to remove the deleted photo
+          fetchPhotos();
+        } else {
+          alert(data.message || 'Failed to update like');
+        }
       }
     } catch (error) {
       console.error('Error toggling like:', error);
-      alert('Error updating like. Please try again.');
+      if (error.message.includes('Failed to fetch')) {
+        alert('Network error. Please check your connection and try again.');
+      } else {
+        alert('Error updating like. Please try again.');
+      }
     }
   };
 
@@ -309,8 +311,10 @@ const PhotoWall = () => {
 
   // Helper function to check if current user has liked a photo
   const isPhotoLikedByUser = (photo) => {
-    if (!user || !user._id || !photo?.likedBy) return false;
-    return photo.likedBy.includes(user._id);
+    if (!user || (!user._id && !user.id) || !photo?.likedBy) return false;
+    // Support both _id and id for compatibility
+    const userId = user._id || user.id;
+    return photo.likedBy.includes(userId);
   };
 
   // ❤️ Like handler with user authentication check
@@ -416,7 +420,7 @@ const PhotoWall = () => {
               <div className={`photo-likes ${isPhotoLikedByUser(photo) ? 'liked' : ''}`} onClick={(e) => { e.stopPropagation(); handleLike(photo._id); }}>
                 {isPhotoLikedByUser(photo) ? '💖' : '❤️'} {photo.likes}
               </div>
-              {user?._id && photo.uploaderId === user._id && (
+              {user?.id && photo.uploaderId === user.id && (
                 <button className="photo-delete-btn" onClick={(e) => { e.stopPropagation(); handleDelete(photo._id); }}>🗑️</button>
               )}
             </div>

@@ -2,9 +2,13 @@
 .about-section {
   display: flex;
   flex-direction: column;
-  padding: 50px 5%;
+  padding: 50px min(5%, 20px);
   background: #fafafa;
   font-family: "Poppins", sans-serif;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Main container */
@@ -13,6 +17,10 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 50px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* ---------- LEFT SIDE ---------- */
@@ -199,24 +207,35 @@
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 900px) {
+  .about-section {
+    padding: 30px min(3%, 15px);
+  }
+  
   .about-cont {
     flex-direction: column;
     align-items: center;
+    gap: 30px;
   }
+  
   .text-cont h1 {
     font-size: 2.3rem;
     text-align: center;
   }
+  
   .text-cont span {
     text-align: center;
   }
+  
   .text-cont button {
     display: block;
     margin: 0 auto;
   }
+  
   .container {
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 15px;
   }
+  
   .notice-title {
     font-size: 1.4rem;
   }

@@ -9,8 +9,8 @@ export const protect = async (req, res, next) => {
   const publicPaths = [
     "/vite.svg",
     "/favicon.ico",
-    "/",
-    "/api/auth",
+    "/api/auth/login",
+    "/api/auth/register",
     "/api/photos",
     "/api/projects",
     "/api/contact",
@@ -37,6 +37,7 @@ export const protect = async (req, res, next) => {
       console.log("🔐 Auth middleware - Token found, length:", token.length);
 
       // verify JWT
+      console.log("🔐 Auth middleware - JWT_SECRET loaded:", process.env.JWT_SECRET ? "YES" : "NO");
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log("🔐 Auth middleware - Token decoded:", {
         id: decoded.id,
@@ -72,10 +73,11 @@ export const protect = async (req, res, next) => {
       });
 
       let errorMessage = "Not authorized, invalid token";
-      if (err.name === "JsonWebTokenError")
-        errorMessage = "Invalid token format";
-      else if (err.name === "TokenExpiredError")
-        errorMessage = "Token has expired";
+      if (err.name === "JsonWebTokenError") {
+        errorMessage = "Invalid token format. Please logout and login again.";
+        console.log("💡 Suggestion: Clear localStorage and re-login to get fresh token");
+      } else if (err.name === "TokenExpiredError")
+        errorMessage = "Token has expired. Please login again.";
 
       return res.status(401).json({ success: false, message: errorMessage });
     }

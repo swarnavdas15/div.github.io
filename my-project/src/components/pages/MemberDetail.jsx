@@ -61,7 +61,7 @@ export default function MemberDetail({ member, onUpdated, onDeleted }) {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/members/${member._id}/password`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ password: pwd }),
+        body: JSON.stringify({ newPassword: pwd }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to change password");

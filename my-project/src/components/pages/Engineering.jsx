@@ -1,19 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ConfirmationModal from "./ConfirmationModal";
 import "../../styles/admindasboard.css";
 
 const Engineering = ({ openLogin, openRegistration }) => {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [confirmationModal, setConfirmationModal] = useState({
-    isOpen: false,
-    title: "",
-    message: "",
-    onConfirm: () => {},
-    type: "info"
   });
   const navigate = useNavigate();
 
@@ -64,20 +56,13 @@ const Engineering = ({ openLogin, openRegistration }) => {
   const handleResourceClick = (resource) => {
     if (resource.access === "members" && !user) {
       // Redirect to login if not authenticated for member-only resources
-      setConfirmationModal({
-        isOpen: true,
-        title: "Member Access Required",
-        message: "This resource is available for members only. Do you want to login?",
-        type: "info",
-        onConfirm: () => {
-          if (openLogin) {
-            openLogin();
-          } else {
-            navigate("/login");
-          }
-          setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+      if (confirm("This resource is available for members only. Do you want to login?")) {
+        if (openLogin) {
+          openLogin();
+        } else {
+          navigate("/login");
         }
-      });
+      }
       return;
     }
 
@@ -88,16 +73,7 @@ const Engineering = ({ openLogin, openRegistration }) => {
     }
 
     // For placeholder links, show development message
-    setConfirmationModal({
-      isOpen: true,
-      title: "Coming Soon",
-      message: `${resource.title} section is under development. Please check back soon!`,
-      type: "warning",
-      onConfirm: () => {
-        setConfirmationModal(prev => ({ ...prev, isOpen: false }));
-      },
-      confirmText: "OK"
-    });
+    alert(`${resource.title} section is under development. Please check back soon!`);
   };
 
   const handleGotoButtonClick = (e, resource) => {
@@ -105,20 +81,13 @@ const Engineering = ({ openLogin, openRegistration }) => {
     
     if (resource.access === "members" && !user) {
       // Redirect to login if not authenticated for member-only resources
-      setConfirmationModal({
-        isOpen: true,
-        title: "Member Access Required",
-        message: "This resource is available for members only. Do you want to login?",
-        type: "info",
-        onConfirm: () => {
-          if (openLogin) {
-            openLogin();
-          } else {
-            navigate("/login");
-          }
-          setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+      if (confirm("This resource is available for members only. Do you want to login?")) {
+        if (openLogin) {
+          openLogin();
+        } else {
+          navigate("/login");
         }
-      });
+      }
       return;
     }
 
@@ -432,18 +401,6 @@ const Engineering = ({ openLogin, openRegistration }) => {
           </button>
         </div>
       </div>
-
-      {/* Custom Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={confirmationModal.isOpen}
-        onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
-        onConfirm={confirmationModal.onConfirm}
-        title={confirmationModal.title}
-        message={confirmationModal.message}
-        type={confirmationModal.type}
-        confirmText={confirmationModal.confirmText || "Confirm"}
-        cancelText="Cancel"
-      />
     </div>
   );
 };

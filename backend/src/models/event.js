@@ -12,6 +12,7 @@ const EventSchema = new mongoose.Schema({
   registrationLink: String,
   registrationActive: { type: Boolean, default: true },
   maxAttendees: Number,
+  currentAttendees: { type: Number, default: 0 },
   participants: [{ type: String }], // store user ids (string) - adapt if storing ObjectId refs
   createdBy: { type: String }, // admin id who created (optional)
   status: { type: String, default: "upcoming" }, // upcoming/ongoing/completed/cancelled

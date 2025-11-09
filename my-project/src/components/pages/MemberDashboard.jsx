@@ -4,7 +4,6 @@ import '../../styles/memberdasboard.css';
 const MemberDashboard = ({ onClose }) => {
   const [me, setMe] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [events, setEvents] = useState([]);
   const [avatars, setAvatars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAllMessages, setShowAllMessages] = useState(false);
@@ -29,7 +28,6 @@ const MemberDashboard = ({ onClose }) => {
       const data = await res.json();
       setMe(data.user || data);
       setMessages(data.messages || []);
-      setEvents(data.events || []);
     } catch (err) {
       console.error(err);
       alert("Could not load profile");
@@ -414,44 +412,6 @@ const MemberDashboard = ({ onClose }) => {
                       </button>
                     </li>
                   )}
-                </ul>
-              )}
-
-              <h3 style={{ marginTop: '2rem' }}>🎯 Events Participated</h3>
-              {events.length === 0 ? (
-                <div className="muted" style={{
-                  textAlign: 'center',
-                  padding: '2rem',
-                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                  borderRadius: '12px',
-                  border: '1px dashed #cbd5e1'
-                }}>
-                  🎉 No events participated yet
-                </div>
-              ) : (
-                <ul>
-                  {events.map(ev => (
-                    <li key={ev._id}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <strong style={{ color: '#1e293b' }}>{ev.title}</strong>
-                          <p className="small-text" style={{ margin: '0.25rem 0 0 0' }}>
-                            📅 {ev.date ? new Date(ev.date).toLocaleDateString() : 'Date not specified'}
-                          </p>
-                        </div>
-                        <span style={{
-                          background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-                          color: 'white',
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '12px',
-                          fontSize: '0.75rem',
-                          fontWeight: '500'
-                        }}>
-                          Participated
-                        </span>
-                      </div>
-                    </li>
-                  ))}
                 </ul>
               )}
             </div>

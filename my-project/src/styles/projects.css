@@ -2,11 +2,15 @@
 
 /* Container */
 .proj-cont {
-  padding: 2rem;
+  padding: 2rem min(2rem, 4vw);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   color: #111;
   min-height: 60vh;
   background: linear-gradient(180deg, #fafafa 0%, #f2f4f8 100%);
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* Header */
@@ -188,6 +192,8 @@
   justify-content: center;
   z-index: 1200;
   padding: 18px;
+  box-sizing: border-box;
+  overflow: auto;
 }
 
 .proj-modal-content {
@@ -246,9 +252,40 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .project-card { width: calc(50% - 12px); }
+  .project-card {
+    width: calc(50% - 9px);
+    min-width: 280px;
+  }
+  
+  .proj-cont {
+    padding: 1.5rem min(1.5rem, 4vw);
+  }
 }
+
 @media (max-width: 680px) {
-  .project-card { width: 100%; }
-  .proj-form-row { flex-direction: column; }
+  .project-card {
+    width: 100%;
+    min-width: auto;
+    max-width: 100%;
+  }
+  
+  .proj-form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .proj-cont {
+    padding: 1rem min(1rem, 3vw);
+  }
+  
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .add-project-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

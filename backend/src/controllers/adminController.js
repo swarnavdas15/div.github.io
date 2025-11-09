@@ -26,7 +26,7 @@ export const getMemberById = async (req, res) => {
 export const deactivateMember = async (req, res) => {
   try {
     const member = await User.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-    res.json({ message: "Member deactivated", member });
+    res.json({ message: "Member deactivated", user: member, member: member });
   } catch (error) {
     res.status(500).json({ message: "Error deactivating member" });
   }
@@ -123,5 +123,14 @@ export const deleteMessage = async (req, res) => {
     res.json({ message: "Message deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting message" });
+  }
+};
+
+// ✅ Upload resource for admin
+export const uploadResource = async (req, res) => {
+  try {
+    res.json({ message: "Resource upload endpoint working" });
+  } catch (error) {
+    res.status(500).json({ message: "Error uploading resource" });
   }
 };

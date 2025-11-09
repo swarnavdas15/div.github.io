@@ -3,7 +3,6 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
-import Events from './components/Events'
 import PhotoWall from './components/Photowall'
 import Projects from './components/Projects'
 import Contacts from './components/Contacts'
@@ -11,9 +10,9 @@ import Footer from './components/Footer'
 import Login from "./components/Login"
 import Registration from './components/Registration'
 import MemberDashboard from './components/pages/MemberDashboard'
-import EventModal from './components/pages/EventModal'
 import Engineering from './components/pages/Engineering'
 import AdminDashboard from './components/pages/AdminDashboard.jsx'
+import Events from './components/Events.jsx'
 
 function App() {
 
@@ -22,7 +21,6 @@ function App() {
 
   const [showMemberDashboard, setShowMemberDashboard] = useState(false);
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [user, setUser] = useState(null);
 
   // Get user from localStorage on component mount
@@ -67,9 +65,6 @@ function App() {
 
   const closeRegistration = () => setShowRegistration(false);
 
-  const openEventModal = (event) => setSelectedEvent(event);
-  const closeEventModal = () => setSelectedEvent(null);
-
   // Removed development console.log statement
 
   return (
@@ -96,11 +91,7 @@ function App() {
             <>
               <Hero />
               <About />
-              <Events
-                openEventModal={openEventModal}
-                isAdmin={user?.role === 'admin'}
-                userId={user?._id}
-              />
+              <Events currentUser={user} />
               <PhotoWall />
               <Projects currentUser={user} />
               <Contacts />
@@ -146,15 +137,6 @@ function App() {
 
       {showAdminDashboard && (
         <AdminDashboard onClose={closeAdminDashboard} />
-      )}
-
-      {selectedEvent && (
-        <div className="modal-overlay">
-          <EventModal
-            event={selectedEvent}
-            onClose={closeEventModal}
-          />
-        </div>
       )}
 
     </>

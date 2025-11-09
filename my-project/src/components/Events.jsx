@@ -1,945 +1,674 @@
-import React, { useState, useMemo, useEffect } from "react";
-import EventCard from "./pages/EventCard";
-import EventModal from "./pages/EventModal";
-import ConfirmationModal from "./pages/ConfirmationModal";
-import NotificationPopup from "./pages/NotificationPopup";
-import Loading from "./Loading";
-import Error from "./Error";
+import React, { useState, useEffect, useMemo } from "react";
 import "../styles/events.css";
 
-const Event = ({ isAdmin = false, userId }) => {
+const Events = ({ currentUser }) => {
+  const defaultConfig = {
+    section_title: "Tech Club Events",
+    section_subtitle: "Discover and join our exciting tech events",
+    upcoming_tab_label: "Upcoming Events",
+    past_tab_label: "Past Events",
+    register_button_text: "Register Now",
+    share_button_text: "Share Event",
+    add_event_button_text: "Add New Event",
+    edit_event_button_text: "Edit Event",
+    delete_event_button_text: "Delete Event",
+  };
+
+  // API Configuration
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+  // State management
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState("All");
-  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortFilter, setSortFilter] = useState("date");
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [confirmationModal, setConfirmationModal] = useState({
-    isOpen: false,
-    title: "",
-    message: "",
-    onConfirm: null,
-    type: "danger"
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
+
+  // Form state for create/edit
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: '',
+    location: '',
+    date: '',
+    time: '',
+    maxAttendees: '',
+    registrationActive: true,
   });
-  const [notification, setNotification] = useState({
-    isOpen: false,
-    title: "",
-    message: "",
-    type: "success"
-  });
-  const [newEvent, setNewEvent] = useState({
-    title: "",
-    date: "",
-    time: "",
-    location: "",
-    imageUrl: "",
-    description: "",
-    registrationLink: "",
-    category: "",
-    maxAttendees: "",
-    status: "upcoming",
-    imageFile: null
-  });
+  const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
-  
-  // API Configuration
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  const FULL_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-  
-  // Debug: Log API configuration
-  console.log('🔧 API Config:', {
-    API_BASE_URL,
-    FULL_API_URL,
-    envVar: import.meta.env.VITE_API_URL,
-    currentLocation: window.location.origin
-  });
- 
-   // Get authentication headers
-   const getAuthHeaders = (includeContentType = true) => {
-     const token = localStorage.getItem("token");
-     const headers = {};
-     
-     if (includeContentType) {
-       headers["Content-Type"] = "application/json";
-     }
-     
-     if (token) {
-       headers["Authorization"] = `Bearer ${token}`;
-     }
-     
-     return headers;
-   };
- 
-   // API request helper
-   const apiRequest = async (endpoint, options = {}) => {
-     // Handle different endpoint types
-     let url;
-     if (endpoint.startsWith('http')) {
-       url = endpoint; // Full URL for external requests
-     } else if (endpoint.startsWith('/api/')) {
-       url = `${API_BASE_URL}${endpoint}`; // Direct API routes
-     } else {
-       url = `${API_BASE_URL}/api${endpoint}`; // Standard API routes
-     }
-     
-     const config = {
-       headers: getAuthHeaders(options.body instanceof FormData ? false : true),
-       ...options,
-     };
-     
-     console.log('🌐 API Request:', { method: options.method || 'GET', url });
-     
-     try {
-       const response = await fetch(url, config);
-       const data = await response.json();
-       
-       console.log('📊 API Response:', { status: response.status, data });
-       
-       if (!response.ok) {
-         throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
-       }
-       
-       return data;
-     } catch (error) {
-       console.error(`❌ API Request failed for ${endpoint}:`, error);
-       throw error;
-     }
-   };
- 
-   // 🟢 Fetch events from backend
-   const fetchEvents = async () => {
-     setLoading(true);
-     setError(null);
-     
-     try {
-       console.log('📡 Starting to fetch events...');
-       const response = await apiRequest('/events');
-       console.log('✅ Events fetched successfully:', response);
-       setEvents(response.data || []);
-     } catch (err) {
-       console.error('❌ Fetch events error:', err);
-       setError(err.message);
-       setEvents([]);
-     } finally {
-       setLoading(false);
-     }
-   };
- 
-   useEffect(() => {
-     fetchEvents();
-   }, []);
- 
-   // Retry function with consistent pattern
-   const handleRetry = () => {
-     fetchEvents();
-   };
 
-   // Test API connection
-   const testConnection = async () => {
-     try {
-       console.log('🔍 Testing API connection...');
-       const response = await fetch(`${API_BASE_URL}/api/events`);
-       console.log('📡 Connection test response:', { status: response.status, ok: response.ok });
-       return response.ok;
-     } catch (error) {
-       console.error('❌ Connection test failed:', error);
-       return false;
-     }
-   };
+  // Check if user is admin
+  const isAdmin = currentUser && currentUser.role === 'admin';
 
-   // Run connection test on component mount
-   useEffect(() => {
-     const checkConnection = async () => {
-       const isConnected = await testConnection();
-       if (!isConnected) {
-         console.warn('⚠️ API connection failed, but continuing...');
-       }
-     };
-     checkConnection();
-   }, []);
- 
-  const handleInput = (e) => {
-    const { name, value } = e.target;
-    setNewEvent((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Simplified file upload handling (following Photowall pattern)
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file || !file.type.startsWith("image/")) {
-      setNotification({
-        isOpen: true,
-        title: "Invalid File",
-        message: "Please select a valid image file (JPG, PNG, GIF, WebP).",
-        type: "error"
-      });
-      return;
-    }
-    
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setNotification({
-        isOpen: true,
-        title: "File Too Large",
-        message: "Image file must be less than 5MB in size.",
-        type: "error"
-      });
-      return;
-    }
-    
-    setNewEvent((prev) => ({ ...prev, imageFile: file }));
-  };
-
-  // Enhanced drag and drop handlers with proper counter
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-  };
-
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    setDragCounter(prev => prev + 1);
-    if (dragCounter === 0) {
-      setDragOver(true);
-    }
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragCounter(prev => {
-      const newCounter = prev - 1;
-      if (newCounter === 0) {
-        setDragOver(false);
-      }
-      return newCounter;
-    });
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragCounter(0);
-    setDragOver(false);
-    
-    const files = e.dataTransfer.files;
-    console.log('🎯 Files dropped:', files.length);
-    
-    if (files && files.length > 0) {
-      const file = files[0];
-      console.log('📄 Dropped file:', file.name, file.type, file.size);
-      
-      if (!file || !file.type.startsWith("image/")) {
-        setNotification({
-          isOpen: true,
-          title: "Invalid File",
-          message: "Please drop a valid image file (JPG, PNG, GIF, WebP).",
-          type: "error"
-        });
-        return;
-      }
-      
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setNotification({
-          isOpen: true,
-          title: "File Too Large",
-          message: "Image file must be less than 5MB in size.",
-          type: "error"
-        });
-        return;
-      }
-      
-      setNewEvent((prev) => ({ ...prev, imageFile: file }));
-      
-      setNotification({
-        isOpen: true,
-        title: "Image Added",
-        message: `${file.name} has been added successfully!`,
-        type: "success"
-      });
-    }
-  };
-
-  // Simplified image upload (following Photowall pattern)
-  const uploadImageToCloudinary = async (formData) => {
+  // Fetch events from API
+  const fetchEvents = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (activeTab !== 'all') {
+        params.append('type', activeTab);
+      }
+      if (searchTerm) {
+        params.append('search', searchTerm);
       }
 
-      const requestOptions = {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      };
-
-      const uploadUrl = `${FULL_API_URL}/api/events/upload-image`;
-      console.log('🖼️ Uploading image to:', uploadUrl);
-      
-      const response = await fetch(uploadUrl, requestOptions);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
+      const response = await fetch(`${API_URL}/api/events?${params}`);
       const data = await response.json();
-      console.log('✅ Upload successful:', data);
-      return data;
-    } catch (error) {
-      console.error('💥 Upload error:', error);
-      throw error;
+      
+      if (data.success) {
+        setEvents(data.data);
+        setError(null);
+      } else {
+        setError(data.message || 'Failed to fetch events');
+      }
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError('Failed to connect to server');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Remove uploaded image
-  const removeImageFile = () => {
-    setNewEvent((prev) => ({ ...prev, imageFile: null, imageUrl: "" }));
-  };
+  // Load events on component mount and when filters change
+  useEffect(() => {
+    fetchEvents();
+  }, [activeTab, searchTerm]);
 
-  // Process form data for backend compatibility
-  const processEventData = (eventData) => {
-    const processed = { ...eventData };
-    
-    // Convert date string to Date object for backend
-    if (processed.date) {
-      processed.date = new Date(processed.date);
-    }
-    
-    // Convert maxAttendees to number
-    if (processed.maxAttendees) {
-      processed.maxAttendees = parseInt(processed.maxAttendees) || null;
-    }
-    
-    // Remove _id for new events
-    if (!processed._id) {
-      delete processed._id;
-    }
-    
-    console.log('Processed event data:', processed);
-    return processed;
-  };
-
-  // Simplified event creation (following Photowall pattern)
+  // Handle create/edit form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validation (simplified)
-    if (!newEvent.title.trim()) {
-      setNotification({
-        isOpen: true,
-        title: "Validation Error",
-        message: "Please enter an event title.",
-        type: "warning"
-      });
-      return;
-    }
+    if (!isAdmin) return;
 
-    if (!newEvent.date) {
-      setNotification({
-        isOpen: true,
-        title: "Validation Error",
-        message: "Please select an event date.",
-        type: "warning"
-      });
-      return;
-    }
-
-    setUploading(true);
-    
     try {
-      console.log('🚀 Starting event creation process...');
-      console.log('📝 Event data:', newEvent);
-      
-      // Handle image upload if new file is selected
-      let processedData = { ...newEvent };
-      
-      if (newEvent.imageFile) {
-        console.log('📋 Creating FormData for image upload...');
-        const formData = new FormData();
-        formData.append('image', newEvent.imageFile);
-        
-        console.log('📤 Uploading image...');
-        const uploadResult = await uploadImageToCloudinary(formData);
-        
-        if (uploadResult.success) {
-          processedData.imageUrl = uploadResult.data.imageUrl;
-        } else {
-          throw new Error(uploadResult.message || 'Failed to upload image');
+      setUploading(true);
+      let imageUrl = editingEvent?.imageUrl || '';
+
+      // Upload image if selected
+      if (imageFile) {
+        const formDataImage = new FormData();
+        formDataImage.append('image', imageFile);
+
+        const uploadResponse = await fetch(`${API_URL}/api/events/upload-image`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formDataImage,
+        });
+
+        const uploadData = await uploadResponse.json();
+        if (uploadData.success) {
+          imageUrl = uploadData.data.imageUrl;
         }
       }
+
+      const eventData = {
+        ...formData,
+        imageUrl,
+        maxAttendees: formData.maxAttendees ? parseInt(formData.maxAttendees) : null,
+        date: new Date(formData.date).toISOString(),
+      };
+
+      const url = editingEvent
+        ? `${API_URL}/api/events/${editingEvent._id}`
+        : `${API_URL}/api/events`;
       
-      // Remove imageFile from processed data
-      delete processedData.imageFile;
-      
-      // Process data for backend
-      processedData = processEventData(processedData);
-      
-      // Use consistent API pattern
-      const endpoint = newEvent._id ? `/events/${newEvent._id}` : '/events';
-      const method = newEvent._id ? 'PUT' : 'POST';
-      
-      const response = await apiRequest(endpoint, {
+      const method = editingEvent ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
         method,
-        body: JSON.stringify(processedData)
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(eventData),
       });
+
+      const data = await response.json();
       
-      if (response.success) {
-        setNotification({
-          isOpen: true,
-          title: "Success",
-          message: `Event ${newEvent._id ? "updated" : "created"} successfully!`,
-          type: "success"
+      if (data.success) {
+        await fetchEvents(); // Refresh events
+        setShowCreateForm(false);
+        setEditingEvent(null);
+        setFormData({
+          title: '',
+          description: '',
+          category: '',
+          location: '',
+          date: '',
+          time: '',
+          maxAttendees: '',
+          registrationActive: true,
         });
-        
-        // Refresh events list
-        await fetchEvents();
-        
-        setShowForm(false);
-        setNewEvent({
-          title: "",
-          date: "",
-          time: "",
-          location: "",
-          imageUrl: "",
-          description: "",
-          registrationLink: "",
-          category: "",
-          maxAttendees: "",
-          status: "upcoming",
-          imageFile: null
-        });
+        setImageFile(null);
       } else {
-        throw new Error(response.message || 'Failed to save event');
+        setError(data.message || 'Failed to save event');
       }
-    } catch (error) {
-      console.error('💥 Event creation error:', error);
-      setNotification({
-        isOpen: true,
-        title: "Error",
-        message: error.message || "Failed to save event. Please try again.",
-        type: "error"
-      });
+    } catch (err) {
+      console.error('Error saving event:', err);
+      setError('Failed to save event');
     } finally {
       setUploading(false);
     }
   };
 
-  // 🟢 Delete Event
-  const handleDelete = async (id) => {
-    setConfirmationModal({
-      isOpen: true,
-      title: "Delete Event",
-      message: "Are you sure you want to delete this event? This action cannot be undone.",
-      onConfirm: async () => {
-        try {
-          const response = await apiRequest(`/events/${id}`, {
-            method: 'DELETE'
-          });
-          
-          if (response.success) {
-            setEvents(events.filter((e) => e._id !== id));
-            setNotification({
-              isOpen: true,
-              title: "Success",
-              message: "Event deleted successfully",
-              type: "success"
-            });
-          }
-        } catch (error) {
-          console.error("Error deleting event:", error);
-          setNotification({
-            isOpen: true,
-            title: "Error",
-            message: error.message || "Failed to delete event. Please try again.",
-            type: "error"
-          });
-        }
-        setConfirmationModal(prev => ({ ...prev, isOpen: false }));
-      },
-      type: "danger"
-    });
+  // Handle event registration
+  const handleRegister = async (eventId) => {
+    if (!currentUser) {
+      alert('Please login to register for events');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/events/${eventId}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ eventId }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Successfully registered for the event!');
+        await fetchEvents(); // Refresh to update attendee count
+      } else {
+        alert(data.message || 'Failed to register');
+      }
+    } catch (err) {
+      console.error('Error registering:', err);
+      alert('Failed to register for event');
+    }
   };
 
-  // 🟢 Deactivate registration link
-  const deactivateLink = async (event) => {
-    setConfirmationModal({
-      isOpen: true,
-      title: "Deactivate Registration",
-      message: "Are you sure you want to deactivate the registration link for this event? Users will no longer be able to register.",
-      onConfirm: async () => {
-        const updated = { ...event, registrationLink: "" };
-        try {
-          await apiRequest(`/events/${event._id}`, {
-            method: 'PUT',
-            body: JSON.stringify(updated)
-          });
-          
-          setNotification({
-            isOpen: true,
-            title: "Success",
-            message: "Registration link deactivated!",
-            type: "success"
-          });
-          setEvents((prev) =>
-            prev.map((e) => (e._id === event._id ? updated : e))
-          );
-        } catch (error) {
-          console.error("Error deactivating registration:", error);
-          setNotification({
-            isOpen: true,
-            title: "Error",
-            message: error.message || "Failed to deactivate registration. Please try again.",
-            type: "error"
-          });
-        }
-        setConfirmationModal(prev => ({ ...prev, isOpen: false }));
-      },
-      type: "warning"
-    });
+  // Handle event deletion
+  const handleDelete = async () => {
+    if (!isAdmin || !eventToDelete) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/events/${eventToDelete._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        await fetchEvents(); // Refresh events
+        setShowDeleteModal(false);
+        setEventToDelete(null);
+      } else {
+        setError(data.message || 'Failed to delete event');
+      }
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      setError('Failed to delete event');
+    }
   };
 
-  // 🟢 Filter + Search
+  // Start editing event
+  const startEdit = (event) => {
+    setEditingEvent(event);
+    setFormData({
+      title: event.title || '',
+      description: event.description || '',
+      category: event.category || '',
+      location: event.location || '',
+      date: event.date ? new Date(event.date).toISOString().split('T')[0] : '',
+      time: event.time || '',
+      maxAttendees: event.maxAttendees?.toString() || '',
+      registrationActive: event.registrationActive,
+    });
+    setShowCreateForm(true);
+  };
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  // Filter and sort events
   const filteredEvents = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    let filtered = events.filter((event) => {
-      const isUpcoming = event.date >= today;
-      const isPast = event.date < today;
-      if (activeTab === "upcoming") return isUpcoming;
-      if (activeTab === "past") return isPast;
-      return true;
-    });
+    return events
+      .filter((e) => (categoryFilter === "all" ? true : e.category === categoryFilter))
+      .sort((a, b) => {
+        if (sortFilter === "name") return a.title.localeCompare(b.title);
+        return new Date(a.date) - new Date(b.date);
+      });
+  }, [events, categoryFilter, sortFilter]);
 
-    if (filterCategory !== "All") {
-      filtered = filtered.filter((e) => e.category === filterCategory);
-    }
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
+  };
 
-    if (searchQuery) {
-      filtered = filtered.filter((e) =>
-        e.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    return filtered;
-  }, [events, activeTab, filterCategory, searchQuery]);
+  // Helper function to get event icon
+  const getEventIcon = (category) => {
+    const icons = {
+      workshop: '🤖',
+      hackathon: '💻',
+      seminar: '🎯',
+      competition: '🏆',
+      meetup: '👥',
+      default: '📅'
+    };
+    return icons[category] || icons.default;
+  };
 
-  const categories = ["All", ...new Set(events.map((e) => e.category))];
+  // Loading state
+  if (loading) {
+    return (
+      <div className="events-container">
+        <div className="events-header">
+          <h1>{defaultConfig.section_title}</h1>
+          <p>{defaultConfig.section_subtitle}</p>
+        </div>
+        <div className="events-loading">
+          <div className="events-loading-spinner">⏳</div>
+          <p>Loading events...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section id="events" className="eventpro-section">
-      <div className="eventpro-header">
-        <h2>Events</h2>
+    <div id="events" className="events-container">
+      {/* Header */}
+      <div className="events-header">
+        <h1>{defaultConfig.section_title}</h1>
+        <p>{defaultConfig.section_subtitle}</p>
         {isAdmin && (
-          <button
-            className="eventpro-add-btn"
-            onClick={() => setShowForm(!showForm)}
+          <button 
+            className="events-btn events-btn-primary"
+            onClick={() => setShowCreateForm(true)}
           >
-            {showForm ? "Cancel" : "➕ Add Event"}
+            ➕ {defaultConfig.add_event_button_text}
           </button>
         )}
       </div>
 
-      <div className="eventpro-tabs">
-        <button
-          className={activeTab === "upcoming" ? "active" : ""}
-          onClick={() => setActiveTab("upcoming")}
-        >
-          Upcoming
-        </button>
-        <button
-          className={activeTab === "past" ? "active" : ""}
-          onClick={() => setActiveTab("past")}
-        >
-          Past
-        </button>
+      {error && (
+        <div className="events-error">
+          <p>❌ {error}</p>
+        </div>
+      )}
+
+      {/* Controls */}
+      <div className="events-controls">
+        {/* Tabs */}
+        <div className="events-tabs">
+          <button
+            className={`events-tab ${activeTab === "upcoming" ? "events-tab-active" : ""}`}
+            onClick={() => setActiveTab("upcoming")}
+          >
+            {defaultConfig.upcoming_tab_label}
+          </button>
+          <button
+            className={`events-tab ${activeTab === "past" ? "events-tab-active" : ""}`}
+            onClick={() => setActiveTab("past")}
+          >
+            {defaultConfig.past_tab_label}
+          </button>
+          <button
+            className={`events-tab ${activeTab === "all" ? "events-tab-active" : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            All Events
+          </button>
+        </div>
+
+        {/* Search + Filters */}
+        <div className="events-search-filter">
+          <div className="events-search-box">
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <span className="events-search-icon">🔍</span>
+          </div>
+
+          <div className="events-filter-group">
+            <select
+              className="events-filter-select"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              <option value="workshop">Workshop</option>
+              <option value="hackathon">Hackathon</option>
+              <option value="seminar">Seminar</option>
+              <option value="competition">Competition</option>
+              <option value="meetup">Meetup</option>
+            </select>
+
+            <select
+              className="events-filter-select"
+              value={sortFilter}
+              onChange={(e) => setSortFilter(e.target.value)}
+            >
+              <option value="date">Sort by Date</option>
+              <option value="name">Sort by Name</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <div className="eventpro-filters">
-        <input
-          type="text"
-          placeholder="Search events..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          {categories.map((c) => (
-            <option key={c}>{c}</option>
-          ))}
-        </select>
+      {/* Events Grid */}
+      <div className="events-grid-container">
+        {filteredEvents.length ? (
+          filteredEvents.map((event) => (
+            <div
+              key={event._id}
+              className="events-card"
+              onClick={() => setSelectedEvent(event)}
+            >
+              <div className="events-card-image">
+                {event.imageUrl ? (
+                  <img src={event.imageUrl} alt={event.title} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                ) : (
+                  getEventIcon(event.category)
+                )}
+              </div>
+              
+              {isAdmin && (
+                <div className="events-admin-controls">
+                  <button 
+                    className="events-admin-btn edit"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEdit(event);
+                    }}
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    className="events-admin-btn delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEventToDelete(event);
+                      setShowDeleteModal(true);
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              )}
+
+              <span className={`events-status-badge events-${event.status}`}>
+                {event.status === "upcoming" ? "Upcoming" : event.status === "past" ? "Past" : event.status}
+              </span>
+              
+              <div className="events-card-content">
+                <span className="events-category-tag">{event.category}</span>
+                <h3 className="events-card-title">{event.title}</h3>
+                <p className="events-card-description">{event.description}</p>
+                <div className="events-card-meta">
+                  <div className="events-meta-item">📅 {formatDate(event.date)}</div>
+                  {event.time && <div className="events-meta-item">🕐 {event.time}</div>}
+                  <div className="events-meta-item">📍 {event.location}</div>
+                  {event.maxAttendees && (
+                    <div className="events-meta-item">👥 {event.currentAttendees || 0}/{event.maxAttendees}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="events-no-results">
+            <div className="events-no-results-icon">📅</div>
+            <div className="events-no-results-text">No events found</div>
+          </div>
+        )}
       </div>
 
-      {/* Add/Edit Event Modal */}
-      {showForm && isAdmin && (
-        <div className="eventpro-modal-overlay" onClick={(e) => e.target.classList.contains("eventpro-modal-overlay") && setShowForm(false)}>
-          <div className="eventpro-form">
-            <div className="eventpro-form-header">
-              <div className="eventpro-form-header-icon">📅</div>
-              <h3>{newEvent._id ? "Edit Event" : "Add New Event"}</h3>
+      {/* Create/Edit Event Modal */}
+      {showCreateForm && isAdmin && (
+        <div className="events-modal-overlay events-modal-active" onClick={() => setShowCreateForm(false)}>
+          <div className="events-modal events-form-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="events-modal-header">
+              <h2>{editingEvent ? 'Edit Event' : 'Create New Event'}</h2>
               <button
-                className="eventpro-form-close-btn"
-                onClick={() => setShowForm(false)}
+                className="events-modal-close"
+                onClick={() => setShowCreateForm(false)}
               >
-                ✕
+                ×
               </button>
             </div>
-            
-            <div className="eventpro-form-container">
-              <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="events-form">
+              <div className="events-form-group">
+                <label>Title *</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="events-form-group">
+                <label>Description *</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows="3"
+                  required
+                />
+              </div>
+              
+              <div className="events-form-row">
+                <div className="events-form-group">
+                  <label>Category *</label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    <option value="workshop">Workshop</option>
+                    <option value="hackathon">Hackathon</option>
+                    <option value="seminar">Seminar</option>
+                    <option value="competition">Competition</option>
+                    <option value="meetup">Meetup</option>
+                  </select>
+                </div>
                 
-                {/* Event Basic Information Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-field">
-                    <label htmlFor="title">Event Title *</label>
-                    <div className="input-wrapper">
-                      <input
-                        id="title"
-                        name="title"
-                        type="text"
-                        placeholder="Enter event title"
-                        value={newEvent.title}
-                        onChange={handleInput}
-                        required
-                      />
-                      <span className="input-icon">📝</span>
-                    </div>
-                    <div className="input-help">Choose a compelling title for your event</div>
-                  </div>
+                <div className="events-form-group">
+                  <label>Date *</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </div>
-
-                {/* Event Details Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-grid">
-                    <div className="eventpro-form-field">
-                      <label htmlFor="category">Category</label>
-                      <div className="input-wrapper">
-                        <input
-                          id="category"
-                          name="category"
-                          type="text"
-                          placeholder="Event category"
-                          value={newEvent.category}
-                          onChange={handleInput}
-                        />
-                        <span className="input-icon">🏷️</span>
-                      </div>
-                    </div>
-                    
-                    <div className="eventpro-form-field">
-                      <label htmlFor="status">Event Status</label>
-                      <div className="input-wrapper">
-                        <select
-                          id="status"
-                          name="status"
-                          value={newEvent.status}
-                          onChange={handleInput}
-                        >
-                          <option value="upcoming">Upcoming</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                        <span className="input-icon">📊</span>
-                      </div>
-                    </div>
-                  </div>
+              </div>
+              
+              <div className="events-form-row">
+                <div className="events-form-group">
+                  <label>Location *</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </div>
-
-                {/* Event Date and Time Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-grid">
-                    <div className="eventpro-form-field">
-                      <label htmlFor="date">Event Date *</label>
-                      <div className="input-wrapper">
-                        <input
-                          id="date"
-                          name="date"
-                          type="date"
-                          value={newEvent.date}
-                          onChange={handleInput}
-                          required
-                        />
-                        <span className="input-icon">📅</span>
-                      </div>
-                    </div>
-                    
-                    <div className="eventpro-form-field">
-                      <label htmlFor="time">Event Time</label>
-                      <div className="input-wrapper">
-                        <input
-                          id="time"
-                          name="time"
-                          type="time"
-                          value={newEvent.time}
-                          onChange={handleInput}
-                        />
-                        <span className="input-icon">🕐</span>
-                      </div>
-                    </div>
-                  </div>
+                
+                <div className="events-form-group">
+                  <label>Time</label>
+                  <input
+                    type="text"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2:00 PM - 5:00 PM"
+                  />
                 </div>
-
-                {/* Event Location and Capacity Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-grid">
-                    <div className="eventpro-form-field">
-                      <label htmlFor="location">Location</label>
-                      <div className="input-wrapper">
-                        <input
-                          id="location"
-                          name="location"
-                          type="text"
-                          placeholder="Event location"
-                          value={newEvent.location}
-                          onChange={handleInput}
-                        />
-                        <span className="input-icon">📍</span>
-                      </div>
-                    </div>
-                    
-                    <div className="eventpro-form-field">
-                      <label htmlFor="maxAttendees">Max Participants</label>
-                      <div className="input-wrapper">
-                        <input
-                          id="maxAttendees"
-                          name="maxAttendees"
-                          type="number"
-                          placeholder="Maximum attendees"
-                          value={newEvent.maxAttendees}
-                          onChange={handleInput}
-                          min="1"
-                        />
-                        <span className="input-icon">👥</span>
-                      </div>
-                    </div>
-                  </div>
+              </div>
+              
+              <div className="events-form-row">
+                <div className="events-form-group">
+                  <label>Max Attendees</label>
+                  <input
+                    type="number"
+                    name="maxAttendees"
+                    value={formData.maxAttendees}
+                    onChange={handleInputChange}
+                    min="1"
+                  />
                 </div>
-
-                {/* Event Image Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-field">
-                    <label htmlFor="eventImage">Event Image</label>
-                    <div className="file-upload-area">
-                      <input
-                        type="file"
-                        id="eventImage"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="file-input-hidden"
-                      />
-                      <label htmlFor="eventImage" className="file-upload-label">
-                        {!newEvent.imageFile ? (
-                          <>
-                            <div className="upload-icon">☁️</div>
-                            <div className="upload-text">
-                              <strong>Click to upload or drag and drop</strong>
-                              <span>PNG, JPG, GIF, WebP up to 5MB</span>
-                            </div>
-                            <div className="upload-requirements">Maximum file size: 5MB</div>
-                          </>
-                        ) : (
-                          <div className="image-preview-modern">
-                            <img
-                              src={URL.createObjectURL(newEvent.imageFile)}
-                              alt="Event preview"
-                            />
-                            <button
-                              type="button"
-                              className="remove-image-btn"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                removeImageFile();
-                              }}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        )}
-                      </label>
-                    </div>
-                    <div className="input-help">Add a compelling image to attract attendees</div>
-                  </div>
+                
+                <div className="events-form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="registrationActive"
+                      checked={formData.registrationActive}
+                      onChange={handleInputChange}
+                    />
+                    Registration Active
+                  </label>
                 </div>
+              </div>
+              
+              <div className="events-form-group">
+                <label>Event Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files[0])}
+                />
+              </div>
+              
+              <div className="events-form-actions">
+                <button 
+                  type="button" 
+                  className="events-btn events-btn-secondary"
+                  onClick={() => setShowCreateForm(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="events-btn events-btn-primary"
+                  disabled={uploading}
+                >
+                  {uploading ? 'Saving...' : (editingEvent ? 'Update Event' : 'Create Event')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-                {/* Event Description Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-field">
-                    <label htmlFor="description">Description</label>
-                    <div className="input-wrapper">
-                      <textarea
-                        id="description"
-                        name="description"
-                        placeholder="Describe your event details, agenda, and any important information..."
-                        value={newEvent.description}
-                        onChange={handleInput}
-                        rows="4"
-                      />
-                      <span className="input-icon textarea-icon">💭</span>
-                    </div>
-                    <div className="input-help">Tell attendees what to expect at your event</div>
-                  </div>
-                </div>
-
-                {/* Registration Link Section */}
-                <div className="eventpro-form-section">
-                  <div className="eventpro-form-field">
-                    <label htmlFor="registrationLink">Registration Link</label>
-                    <div className="input-wrapper">
-                      <input
-                        id="registrationLink"
-                        name="registrationLink"
-                        type="url"
-                        placeholder="https://registration-link.com"
-                        value={newEvent.registrationLink}
-                        onChange={handleInput}
-                      />
-                      <span className="input-icon">🔗</span>
-                    </div>
-                    <div className="input-help">Provide a link for event registration (optional)</div>
-                  </div>
-                </div>
-
-                {/* Form Actions */}
-                <div className="eventpro-form-actions">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForm(false);
-                      setNewEvent({
-                        title: "",
-                        date: "",
-                        time: "",
-                        location: "",
-                        imageUrl: "",
-                        description: "",
-                        registrationLink: "",
-                        category: "",
-                        maxAttendees: "",
-                        status: "upcoming",
-                        imageFile: null
-                      });
-                    }}
-                    disabled={uploading}
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <div className="events-modal-overlay events-modal-active" onClick={() => setSelectedEvent(null)}>
+          <div className="events-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="events-modal-header">
+              <div className="events-modal-title-icon">
+                {selectedEvent.imageUrl ? (
+                  <img src={selectedEvent.imageUrl} alt={selectedEvent.title} style={{width: '60px', height: '60px', objectFit: 'cover', borderRadius: '10px'}} />
+                ) : (
+                  getEventIcon(selectedEvent.category)
+                )}
+              </div>
+              <button
+                className="events-modal-close"
+                onClick={() => setSelectedEvent(null)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="events-modal-body">
+              <span className="events-modal-category">{selectedEvent.category}</span>
+              <h2 className="events-modal-title">{selectedEvent.title}</h2>
+              <div className="events-modal-meta">
+                <div className="events-modal-meta-item">📅 {formatDate(selectedEvent.date)}</div>
+                {selectedEvent.time && <div className="events-modal-meta-item">🕐 {selectedEvent.time}</div>}
+                <div className="events-modal-meta-item">📍 {selectedEvent.location}</div>
+                {selectedEvent.maxAttendees && (
+                  <div className="events-modal-meta-item">👥 {selectedEvent.currentAttendees || 0}/{selectedEvent.maxAttendees}</div>
+                )}
+              </div>
+              <p className="events-modal-description">{selectedEvent.description}</p>
+              <div className="events-modal-actions">
+                {selectedEvent.registrationActive && (
+                  <button 
+                    className="events-btn events-btn-primary"
+                    onClick={() => handleRegister(selectedEvent._id)}
                   >
-                    Cancel
+                    ✓ {defaultConfig.register_button_text}
                   </button>
-                  <button
-                    type="submit"
-                    disabled={uploading}
-                  >
-                    {uploading ? (
-                      <>
-                        <div className="event-form-uploading-spinner"></div>
-                        {newEvent._id ? "Updating Event..." : "Creating Event..."}
-                      </>
-                    ) : (
-                      newEvent._id ? "📤 Update Event" : "🎉 Create Event"
-                    )}
-                  </button>
-                </div>
-              </form>
+                )}
+                <button className="events-btn events-btn-secondary">
+                  🔗 {defaultConfig.share_button_text}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {loading ? (
-        <Loading
-          type="wave"
-          message="Loading events..."
-          interactive={true}
-          showProgress={true}
-          size="medium"
-          suggestions={[
-            "Events are being fetched from our servers",
-            "This usually takes just a moment",
-            "We're preparing an amazing experience for you"
-          ]}
-        />
-      ) : error ? (
-        <Error
-          type="error"
-          title="Failed to Load Events"
-          message={error}
-          onRetry={handleRetry}
-          showRetry={true}
-          showGoHome={false}
-          suggestions={[
-            "Check your internet connection",
-            "Try refreshing the page",
-            "If the problem persists, contact support"
-          ]}
-        />
-      ) : (
-        <div className="eventpro-grid">
-          {filteredEvents.length === 0 ? (
-            <div className="no-events-message">
-              <p>No events found.</p>
-              {isAdmin && <p>Click "Add Event" to create the first event!</p>}
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="events-modal-overlay events-modal-active" onClick={() => setShowDeleteModal(false)}>
+          <div className="events-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="events-modal-header">
+              <h2>Confirm Deletion</h2>
+              <button
+                className="events-modal-close"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                ×
+              </button>
             </div>
-          ) : (
-            filteredEvents.map((event) => (
-              <div key={event._id} className="eventpro-card">
-                <EventCard
-                  event={event}
-                  isAdmin={isAdmin}
-                  onClick={() => setSelectedEvent(event)}
-                  onShare={() => {
-                    navigator.clipboard.writeText(window.location.href + `#event-${event._id}`);
-                    setNotification({
-                      isOpen: true,
-                      title: "Link Copied",
-                      message: "Event link copied to clipboard!",
-                      type: "success"
-                    });
-                  }}
-                  onEdit={(event) => {
-                    setNewEvent(event);
-                    setShowForm(true);
-                  }}
-                  onDelete={handleDelete}
-                  onToggleRegistration={deactivateLink}
-                />
+            <div className="events-modal-body">
+              <p>Are you sure you want to delete "{eventToDelete?.title}"?</p>
+              <div className="events-modal-actions">
+                <button 
+                  className="events-btn events-btn-secondary"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="events-btn events-btn-primary"
+                  onClick={handleDelete}
+                  style={{background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'}}
+                >
+                  Delete Event
+                </button>
               </div>
-            ))
-          )}
+            </div>
+          </div>
         </div>
       )}
-
-      {selectedEvent && (
-        <EventModal
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-          userId={userId}
-        />
-      )}
-      
-      <ConfirmationModal
-        isOpen={confirmationModal.isOpen}
-        onClose={() => setConfirmationModal(prev => ({ ...prev, isOpen: false }))}
-        onConfirm={confirmationModal.onConfirm}
-        title={confirmationModal.title}
-        message={confirmationModal.message}
-        type={confirmationModal.type}
-        confirmText="Confirm"
-        cancelText="Cancel"
-      />
-      
-      <NotificationPopup
-        isOpen={notification.isOpen}
-        onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
-        title={notification.title}
-        message={notification.message}
-        type={notification.type}
-      />
-    </section>
+    </div>
   );
 };
 
-export default Event;
+export default Events;

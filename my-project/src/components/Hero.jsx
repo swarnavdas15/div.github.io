@@ -29,7 +29,7 @@ const Hero = () => {
         <div className="as-logo">
           {/* Using text placeholder instead of missing logo image */}
           <div className="logo-placeholder">
-            <img src="" alt="" />
+            <img src="./src/assets/divlogo2.png" alt="" />
           </div>
         </div>
 
