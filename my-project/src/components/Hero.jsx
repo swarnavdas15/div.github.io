@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import divlogo2 from "../assets/divlogo2.png";
 import "../styles/hero.css";
 
 const Hero = () => {
@@ -29,7 +30,7 @@ const Hero = () => {
         <div className="as-logo">
           {/* Using text placeholder instead of missing logo image */}
           <div className="logo-placeholder">
-            <img src="./src/assets/divlogo2.png" alt="" />
+            <img src={divlogo2} alt="div" />
           </div>
         </div>
 
