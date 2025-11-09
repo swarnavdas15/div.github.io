@@ -53,9 +53,6 @@ const Events = ({ currentUser }) => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (activeTab !== 'all') {
-        params.append('type', activeTab);
-      }
       if (searchTerm) {
         params.append('search', searchTerm);
       }
@@ -77,10 +74,10 @@ const Events = ({ currentUser }) => {
     }
   };
 
-  // Load events on component mount and when filters change
+  // Load events on component mount and when search term changes
   useEffect(() => {
     fetchEvents();
-  }, [activeTab, searchTerm]);
+  }, [searchTerm]);
 
   // Handle create/edit form submission
   const handleSubmit = async (e) => {
@@ -243,15 +240,39 @@ const Events = ({ currentUser }) => {
     }));
   };
 
+  // Helper function to determine event status based on date
+  const getEventStatus = (eventDate) => {
+    const now = new Date();
+    const eventDateTime = new Date(eventDate);
+    
+    // Set time to end of day for event date to consider it upcoming until the end of that day
+    eventDateTime.setHours(23, 59, 59, 999);
+    
+    if (eventDateTime >= now) {
+      return 'upcoming';
+    } else {
+      return 'past';
+    }
+  };
+
   // Filter and sort events
   const filteredEvents = useMemo(() => {
     return events
-      .filter((e) => (categoryFilter === "all" ? true : e.category === categoryFilter))
+      .filter((e) => {
+        // First apply category filter
+        const categoryMatch = categoryFilter === "all" ? true : e.category === categoryFilter;
+        
+        // Then apply tab filter based on date
+        const eventStatus = getEventStatus(e.date);
+        const tabMatch = activeTab === "all" ? true : eventStatus === activeTab;
+        
+        return categoryMatch && tabMatch;
+      })
       .sort((a, b) => {
         if (sortFilter === "name") return a.title.localeCompare(b.title);
         return new Date(a.date) - new Date(b.date);
       });
-  }, [events, categoryFilter, sortFilter]);
+  }, [events, categoryFilter, sortFilter, activeTab]);
 
   // Helper function to format date
   const formatDate = (dateString) => {
@@ -412,8 +433,8 @@ const Events = ({ currentUser }) => {
                 </div>
               )}
 
-              <span className={`events-status-badge events-${event.status}`}>
-                {event.status === "upcoming" ? "Upcoming" : event.status === "past" ? "Past" : event.status}
+              <span className={`events-status-badge events-${getEventStatus(event.date)}`}>
+                {getEventStatus(event.date) === "upcoming" ? "Upcoming" : "Past"}
               </span>
               
               <div className="events-card-content">
