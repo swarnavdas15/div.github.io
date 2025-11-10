@@ -17,8 +17,11 @@
 }
 
 .navbar.scrolled {
-  background: url(https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg) repeat center/cover;
-  
+  background: var(--bg-img) ;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
 .navbar-container {

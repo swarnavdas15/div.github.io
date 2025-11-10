@@ -28,25 +28,30 @@
   flex: 1;
   min-width: 320px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
 }
 
 .text-cont {
   max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  
 }
 
 .text-cont h1 {
-  font-size: 3rem;
+  font-size: 5rem;
   color: #1e3a8a;
   margin-bottom: 20px;
 }
 
 .text-cont span {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   color: #374151;
   line-height: 1.6;
   display: block;
+  text-align: justify;
   margin-bottom: 25px;
 }
 
@@ -57,6 +62,7 @@
   color: white;
   border: none;
   border-radius: 8px;
+  width: 30%;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -126,6 +132,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+ object-position: 15% 15%;
   transition: all 0.4s ease;
 }
 
@@ -134,6 +141,9 @@
 }
 
 .content {
+  position: absolute;
+  top: 75%;
+  left: 8%;
   padding: 10px 0 15px 0;
 }
 

@@ -36,7 +36,7 @@ export default function About() {
       id: 3,
       name: "Chandrabhan Mahato",
       role: "President",
-      img: "https://img.freepik.com/free-photo/portrait-handsome-young-man-makes-okay-gesture-demonstrates-agreement-likes-idea-smiles-happily-wears-optical-glasses-yellow-hat-t-shirt-models-indoor-its-fine-thank-you-hand-sign_273609-30676.jpg?size=626&ext=jpg",
+      img: "https://raw.githubusercontent.com/swarnavdas15/div-document/refs/heads/main/WhatsApp%20Image%202025-11-06%20at%2023.20.50_c7c8180e.jpg",
       linkedin: "https://linkedin.com/in/uvaish",
       github: "https://github.com/uvaish",
       email: "mailto:uvaish@example.com",
@@ -45,7 +45,7 @@ export default function About() {
       id: 4,
       name: "B. Jyotsana",
       role: "Vice President",
-      img: "https://image.freepik.com/free-photo/young-beautiful-woman-pink-warm-sweater-natural-look-smiling-portrait-isolated-long-hair_285396-896.jpg",
+      img: "https://raw.githubusercontent.com/swarnavdas15/div-document/refs/heads/main/WhatsApp%20Image%202025-11-07%20at%2010.08.25_4fda5f8b.jpg",
       linkedin: "https://linkedin.com/in/jyotsana",
       github: "https://github.com/jyotsana",
       email: "mailto:jyotsana@example.com",
@@ -54,16 +54,16 @@ export default function About() {
       id: 5,
       name: "Swarnav Das",
       role: "Tech Head",
-      img: "https://image.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg",
-      linkedin: "https://linkedin.com/in/swarnav",
-      github: "https://github.com/swarnav",
-      email: "mailto:swarnav@example.com",
+      img: "https://raw.githubusercontent.com/swarnavdas15/div-document/refs/heads/main/WhatsApp%20Image%202025-11-03%20at%2019.21.52_c5733fd4.jpg",
+      linkedin: "https://www.linkedin.com/in/swarnav-das-6929542bb",
+      github: "https://github.com/swarnavdas15",
+      email: "mailto:swarnavofcl15@gmail.com",
     },
     {
       id: 6,
       name: "Deepak Kumar",
       role: "Admin Head",
-      img: "https://image.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg",
+      img: "https://raw.githubusercontent.com/swarnavdas15/div-document/refs/heads/main/WhatsApp%20Image%202025-11-07%20at%2010.54.53_09d8ed93.jpg",
       linkedin: "https://linkedin.com/in/deepak",
       github: "https://github.com/deepak",
       email: "mailto:deepak@example.com",
@@ -72,7 +72,7 @@ export default function About() {
       id: 7,
       name: "Md. Uvaish",
       role: "Student Coordinator",
-      img: "https://img.freepik.com/free-photo/portrait-handsome-young-man-makes-okay-gesture-demonstrates-agreement-likes-idea-smiles-happily-wears-optical-glasses-yellow-hat-t-shirt-models-indoor-its-fine-thank-you-hand-sign_273609-30676.jpg?size=626&ext=jpg",
+      img: "https://raw.githubusercontent.com/swarnavdas15/div-document/refs/heads/main/WhatsApp%20Image%202025-11-06%20at%2023.46.53_8495a968.jpg",
       linkedin: "https://linkedin.com/in/uvaish",
       github: "https://github.com/uvaish",
       email: "mailto:uvaish@example.com",
@@ -111,11 +111,9 @@ export default function About() {
             <div className="text-cont">
               <h1>About Us</h1>
               <span>
-                Welcome to Div Club, the premier technology club of Chouksey
-                Engineering College, Bilaspur. We are a passionate community of
-                tech enthusiasts, developers, and innovators dedicated to
-                fostering technological excellence and creating groundbreaking
-                projects that make a real impact in the digital world.
+                <br />
+      
+               DIV—short for Dive Into Vision—is a vibrant student-led community at Chouksey Engineering College that empowers learners to explore, innovate, and grow in the world of technology. Founded in 2024, the club serves as a dynamic platform where aspiring engineers and tech enthusiasts collaborate on real-world projects, share knowledge, and build future-ready skills. With the motto “We make every bit worthy,” DIV encourages students to push boundaries and turn their ideas into impactful solutions.
               </span>
               <button onClick={openAboutModal}>Learn More</button>
             </div>

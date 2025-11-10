@@ -22,3 +22,6 @@ html {
   width: 100%;
   overflow-x: hidden;
 }
+:root{
+  --bg-img: url('https://images.pexels.com/photos/17964667/pexels-photo-17964667.jpeg')
+}

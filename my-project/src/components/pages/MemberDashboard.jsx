@@ -38,10 +38,10 @@ const MemberDashboard = ({ onClose }) => {
 
   const loadAvatars = () => {
     setAvatars([
-      "/assets/avatars/avatar1.png",
-      "/assets/avatars/avatar2.png",
-      "/assets/avatars/avatar3.png",
-      "/assets/avatars/avatar4.png",
+      "/assets/avatars/avatar1.jpg",
+      "/assets/avatars/avatar2.jpg",
+      "/assets/avatars/avatar3.jpg",
+      "/assets/avatars/avatar4.jpg",
     ]);
   };
 
@@ -204,7 +204,7 @@ const MemberDashboard = ({ onClose }) => {
             </div>
             
             <img
-              src={me.avatar || "/assets/avatars/default.png"}
+              src={me.avatar || "/assets/avatars/avatar1.jpg"}
               alt={`${me.name}'s avatar`}
               className="profile-avatar"
               onError={(e) => {

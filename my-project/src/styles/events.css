@@ -6,8 +6,11 @@
   padding: 20px min(20px, 4vw);
   font-family: "Poppins", sans-serif;
   color: #222;
-  background: linear-gradient(135deg, #451805, #a45237d1);
+  background:  var(--bg-img) ;
   background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
   min-height: 100vh;
   border-radius: 20px;
   box-sizing: border-box;

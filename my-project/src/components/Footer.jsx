@@ -18,10 +18,12 @@ const Footer = () => {
             <li><a href="/">Home</a></li>
             <li><a href="/about">About</a></li>
             <li><a href="/projects">Projects</a></li>
+            <li><a href="/contact">Contact</a></li>
           </ul>
           <ul>
-             <li><a href="/contact">Contact</a></li>
               <li><a href="/events">Events</a></li>
+              <li><a href="/">Tutorials</a></li>
+              <li><a href="/">CEC</a></li>
               <li><a href="/engineering">Engineering</a></li>
           </ul>
         </div>
@@ -30,17 +32,14 @@ const Footer = () => {
         <div className="footer-social">
           <h3>Connect</h3>
           <div className="social-icons">
-            <a href="https://github.com/" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-github"></i>
+            <a href="https://whatsapp.com/channel/0029VavGXqC3gvWcouPNqc1l" target="_blank" rel="noopener noreferrer">
+              <i className="fab fa-whatsapp"></i>
             </a>
-            <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.linkedin.com/company/div-techclub/ " target="_blank" rel="noopener noreferrer">
               <i className="fab fa-linkedin"></i>
             </a>
-            <a href="mailto:example@email.com">
+            <a href="mailto:divfoundation958@gmail.com">
               <i className="fas fa-envelope"></i>
-            </a>
-            <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-x-twitter"></i>
             </a>
           </div>
         </div>
