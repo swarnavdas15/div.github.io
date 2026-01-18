@@ -6,7 +6,7 @@
   justify-content: space-between;
   width: 100%;
   max-width: 100vw;
-  background: transparent;
+  background: url();
   transition: all 0.3s ease;
   z-index: 1000;
   color: rgb(230, 212, 190);
@@ -17,7 +17,7 @@
 }
 
 .navbar.scrolled {
-  background: var(--bg-img) ;
+  background: linear-gradient(rgb(38, 24, 15), rgb(65, 226, 20));
   background-attachment: fixed;
   background-repeat: no-repeat;
   background-size: cover;

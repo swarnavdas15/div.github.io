@@ -13,6 +13,7 @@ import MemberDashboard from './components/pages/MemberDashboard'
 import Engineering from './components/pages/Engineering'
 import AdminDashboard from './components/pages/AdminDashboard.jsx'
 import Events from './components/Events.jsx'
+import RymdBackground from './components/RymdBackground.jsx'
 
 function App() {
 
@@ -69,6 +70,9 @@ function App() {
 
   return (
     <>
+    <div className="min-h-screen relative overflow-hidden">
+    <RymdBackground />
+    <main>
       <Navbar
         openLogin={openLogin}
         openRegistration={openRegistration}
@@ -138,7 +142,8 @@ function App() {
       {showAdminDashboard && (
         <AdminDashboard onClose={closeAdminDashboard} />
       )}
-
+    </main>
+    </div>
     </>
   )
 }

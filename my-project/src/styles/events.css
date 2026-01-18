@@ -31,7 +31,7 @@
 .events-header h1 {
   font-size: 2.8rem;
   font-weight: 800;
-  background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+  background: linear-gradient(45deg, #ff6b6b, #cd9c4e, #823c27, #ceb696);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -61,7 +61,7 @@
 }
 
 .events-tab {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ef8b5d 0%, #833e23 100%);
   border: none;
   padding: 15px 25px;
   border-radius: 50px;
@@ -158,11 +158,11 @@
 .events-filter-select {
   padding: 12px 18px;
   border: 2px solid transparent;
-  border-radius: 50px;
+  border-radius: 30px;
   outline: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: linear-gradient(135deg, #f3a999 0%, #fed6e3 100%);
   color: #333;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -175,7 +175,7 @@
 }
 
 .events-filter-select:focus {
-  border-color: #4ecdc4;
+  border-color: #cd7f4e;
   transform: scale(1.05);
 }
 
@@ -189,7 +189,7 @@
 
 /* ========== Event Card ========== */
 .events-card {
-  background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+  background: linear-gradient(135deg, #83513c 0%, #60372b 100%);
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -207,7 +207,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+  background: linear-gradient(90deg, #ff6b6b, #a2763c, #d19445, #633920);
   background-size: 300% 100%;
   animation: gradientMove 2s linear infinite;
 }
@@ -227,7 +227,7 @@
   font-size: 2.5rem;
   text-align: center;
   padding: 20px 0 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a26c3f 0%, #965638 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

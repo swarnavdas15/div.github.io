@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef  } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 
 import "../styles/navbar.css";
@@ -18,7 +18,7 @@ const Navbar = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const navigate = useNavigate();
-
+  const closeTimeoutRef = useRef(null);
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 100);
     window.addEventListener("scroll", handleScroll);
@@ -156,8 +156,20 @@ const Navbar = ({
 
             <div
               className="dropdown"
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              onMouseLeave={() => setIsDropdownOpen(false)}
+             onMouseEnter={() => {
+  if (closeTimeoutRef.current) {
+    clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = null;
+  }
+  setIsDropdownOpen(true);
+}}
+
+onMouseLeave={() => {
+  closeTimeoutRef.current = setTimeout(() => {
+    setIsDropdownOpen(false);
+  }, 250); 
+}}
+
             >
               <button className="dropdown-btn">
                 Resources <span className="chevron">&#9662;</span>
