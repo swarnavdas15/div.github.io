@@ -5,8 +5,8 @@ export default function RymdBackground() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const STAR_COLOR = "#fff";
-    const STAR_SIZE = 5;
+    const STAR_COLOR = "#f78a05";
+    const STAR_SIZE = 8;
     const STAR_MIN_SCALE = 0.2;
     const OVERFLOW_THRESHOLD = 50;
 
@@ -81,8 +81,8 @@ export default function RymdBackground() {
     }
 
     function update() {
-      velocity.tx *= 0.96;
-      velocity.ty *= 0.96;
+      velocity.tx *= 0.66;
+      velocity.ty *= 0.66;
 
       velocity.x += (velocity.tx - velocity.x) * 0.8;
       velocity.y += (velocity.ty - velocity.y) * 0.8;
